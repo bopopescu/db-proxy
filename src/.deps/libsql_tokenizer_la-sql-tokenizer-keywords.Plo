@@ -1,0 +1,1 @@
+libsql_tokenizer_la-sql-tokenizer-keywords.lo: sql-tokenizer-keywords.c

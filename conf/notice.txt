@@ -1,0 +1,191 @@
+连接proxy-db
+mysql -uroot -p123456 -P3308 -h127.0.0.1
+
+
+管理器
+mysql -uadmin -padmin -P3309 -h127.0.0.1
+
+增加分表
+add tables 'dbproxy3.sbtest.k.5';
+
+//按create_time分表
+add tables 'dbproxy3.test_time.create_time.5.3';
+
+remove tables like 'dbproxy3.test_time';
+
+
+具体方法为
+static gint add_shard_tables(chassis_plugin_config *config, gchar **shard_tables);
+
+typedef struct {
+    gchar* db_name;
+    gchar* table_name;
+    gchar* column_name;
+    guint table_num;
+    guint split_table_method;  //1 hash  2 time  3分区间
+} db_table_t;
+
+
+DBProxy的平滑下线
+shutdown normal;
+
+show variables like 'keepalive'; 
+
+
+save config;
+
+
+show tables;
+
+SELECT * FROM backends
+show lastest_queries;
+
+show variables like 'admin-address';     #查看admin端口的配置                     
+show variables like 'proxy-address';     #查看proxy端口的配置    
+
+//添加一个从库
+add slave 10.99.1.151:3306;
+
+//设置 线上 线下状态
+3 为$backend_ndx
+ set online 3;
+ set offline 3;
+
+//设置权重
+ set weight 2;
+
+############################################################################################
+
+create database dbproxy;
+use dbproxy;
+
+
+能远程登陆mysql 
+GRANT ALL PRIVILEGES ON *.* TO 'wheat'@'%'  IDENTIFIED BY '123456' WITH GRANT OPTION;
+flush privileges;
+
+
+登录主服务器的mysql，查询master的状态
+show master status;
+
+配置从服务器Slave
+log-bin=mysqlbin-log
+server-id=226
+relay_log=mysql-relay-bin
+
+change master to master_host='10.99.1.120',master_user='root',master_password='123456',  master_log_file='mysql-bin.000004',master_log_pos=120;
+
+
+
+/usr/local/mysql/bin/mysqld --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --plugin-dir=/usr/local/mysql/lib/plugin --user=mysql --log-error=/usr/local/mysql/log/error.log --pid-file=/usr/local/mysql/data/mysql.pid --socket=/usr/local/mysql/mysql.sock
+
+主库执行
+use dbproxy3;
+create table abc_0(id int primary key auto_increment, uid int not null);
+create table abc_1(id int primary key auto_increment, uid int not null);
+create table abc_2(id int primary key auto_increment, uid int not null);
+create table abc_3(id int primary key auto_increment, uid int not null);
+create table abc_4(id int primary key auto_increment, uid int not null);
+
+alter table abc_0 add create_time TIMESTAMP NOT NULL;
+insert  into abc set uid=3;
+
+http://blog.csdn.net/seteor/article/details/17264633
+
+mysql主从复制，经常会遇到错误而导致slave端复制中断，这个时候一般就需要人工干预，跳过错误才能继续
+跳过错误有两种方式：
+1.跳过指定数量的事务：
+mysql>stop slave;
+mysql>SET GLOBAL SQL_SLAVE_SKIP_COUNTER = 1;        #跳过一个事务
+mysql>start slave; 
+
+2.修改mysql的配置文件，通过slave_skip_errors参数来跳所有错误或指定类型的错误
+http://blog.csdn.net/qq_31648761/article/details/51997163
+
+http://www.drupal001.com/2013/06/add-new-database-existing-mysql-master-slave/
+
+vi /etc/my.cnf
+[mysqld]
+#slave-skip-errors=1062,1053,1146 #跳过指定error no类型的错误
+#slave-skip-errors=all #跳过所有错误
+
+
+
+
+CREATE TABLE `abc` (
+  `uid` int(11) NOT NULL,
+  `name` char(20) NOT NULL,
+  `id` bigint(20) NOT NULL,
+  KEY `idx_uid` (`uid`)
+) ENGINE=InnoDB;
+
+CREATE TABLE sbtest_0 (
+id bigint UNSIGNED NOT NULL,
+k INTEGER UNSIGNED DEFAULT '0' NOT NULL,
+c CHAR(120) DEFAULT '' NOT NULL,
+pad CHAR(60) DEFAULT '' NOT NULL,
+PRIMARY KEY (id)
+) /*! ENGINE = innodb MAX_ROWS = 1000000 */;
+
+alter table  sbtest_1 change id id bigint not null;
+
+sysbench --test=/usr/local/share/sysbench/tests/include/oltp_legacy/oltp.lua --oltp_tables_count=2 --oltp-table-size=100000 --mysql-user=root --mysql-password=123456 --mysql-host=127.0.0.1 --mysql-port=3308  --mysql-db=dbproxy3 --num-threads=20 --max-time=120 --max-requests=0 --oltp-test-mode=complex prepare
+
+录入数据
+sysbench --test=/usr/local/share/sysbench/tests/include/oltp_legacy/oltp.lua \
+--mysql-host=127.0.0.1  --mysql-user=root  --mysql-port=3308  --mysql-db=dbproxy3 --mysql-password=123456 \
+--oltp-table-size=10000 \
+--num-threads=20 --max-time=120 --max-requests=0 --oltp-test-mode=complex prepare
+
+开始测试
+sysbench --test=/usr/local/share/sysbench/tests/include/oltp_legacy/oltp.lua \
+--mysql-host=127.0.0.1  --mysql-user=root  --mysql-port=3308  --mysql-db=dbproxy3 --mysql-password=123456 \
+ --oltp_tables_count=5  --oltp-table-size=1000 \
+ --num-threads=20  --max-time=30  --oltp-read-only=on  \
+--report-interval=10 --rand-type=uniform   \
+ --max-requests=0 --percentile=99 run >> /tmp/log/abc.log
+
+
+INSERT INTO sbtest(k, c, pad) VALUES(49929, '83868641912-28773972837-607361204
+
+
+
+86-75162659906-27563526494-20381887404-41576422241-93426793964-56405065102-33518432330', '67847967377-48000963322-62604785301-91415491898-96926520291');
+
+
+
+#######################################################################
+
+命令行 敲出的sql
+admin_lua_read_query
+
+
+#######################################################################
+create table log_0 (id bigint not null, file_path char(30) not null, name char(20) not null);
+alter table log_0 add index idx_file_path (file_path);
+alter table log_0 modify file_path char(200) not null;
+
+//create_time 为维度 分表
+CREATE TABLE test_time_4 (
+ `id` bigint(20) NOT NULL,
+  `name` char(20) NOT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB;
+
+
+
+###########################################################################
+
+tables=dbproxy3.sbtest.k.5,dbproxy3.test_time.create_time.5,dbproxy3.abc.uid.5,dbproxy3.log.file_path.5
+
+#################################
+atlas 分表
+http://blog.csdn.net/wssg3620625/article/details/23268865
+
+
+yum install -y   jemalloc jemalloc-devel libevent libevent-devel openssl openssl-devel lua lua-devel bison flex libtool.x86_64
+
+
+
+/usr/local/mysql-proxy/bin/mysql-proxy --defaults-file=/usr/local/mysql-proxy/conf/source.cnf

@@ -1,0 +1,8 @@
+show variables like 'thread-running-sleep-delay';
+Variable_name	Group	Value	Set mode
+thread-running-sleep-delay	main	1(ms)	Dynamic
+set thread-running-sleep-delay = 20;
+status
+show variables like 'thread-running-sleep-delay';
+Variable_name	Group	Value	Set mode
+thread-running-sleep-delay	main	20(ms)	Dynamic

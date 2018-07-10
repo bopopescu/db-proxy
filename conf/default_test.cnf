@@ -1,0 +1,19 @@
+
+[mysql-proxy]
+keepalive = false
+log-level = message
+event-threads = 8
+proxy-read-only-backend-addresses = 10.99.1.135:3306
+admin-password = admin
+basedir = /usr/local/mysql-proxy
+log-path = /usr/local/mysql-proxy/log/
+select-where-limit = true
+instance = default_test
+admin-address = 0.0.0.0:3323
+plugin-dir = /usr/local/mysql-proxy/lib/mysql-proxy/plugins/
+proxy-address = 0.0.0.0:3308
+admin-username = admin
+proxy-backend-addresses = 10.99.1.148:3306
+pwds = root:7O7YJJEK
+sql-log = REALTIME
+daemon = true

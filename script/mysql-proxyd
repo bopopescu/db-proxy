@@ -1,0 +1,115 @@
+#!/bin/bash
+
+name="MySQL-Proxy of $1"
+proxydir=/usr/local/mysql-proxy
+binfile="$proxydir/bin/mysql-proxy"
+#pidfile="$proxydir/log/$1.pid"
+confile="$proxydir/conf/$1.cnf"
+logpath=`grep "log-path" $confile | awk -F = '{ print $2 }'`
+if test ! -s "$logpath"; then
+	logpath="/usr/local/mysql-proxy/"
+fi
+pidfile="$logpath/$1.pid"
+recheck_times=6
+curcheck_times=0
+check_timeout=0.5
+function start()
+{
+	ps -ef | grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep >/dev/null 2>&1
+
+	if [ "$?" == "0" ]; then
+		echo "warning: $name is running now"
+	else
+		rm -f $pidfile || true
+		$binfile --defaults-file=$confile
+
+		if [ "$?" == "0" ]; then
+			echo "OK: $name is started"
+		else
+			echo "error: failed to start $name"
+			exit 2
+		fi
+	fi
+}
+
+function stop()
+{
+	ps -ef | grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep >/dev/null 2>&1
+
+	if [ "$?" == "0" ]; then
+		pid=`ps -ef |  grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep | awk '{print $2}'`
+		ps -ef |  grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep | awk '{print $2}' | xargs kill -9 >/dev/null 2>&1
+
+		if [ "$?" == "0" ]; then
+			while test $curcheck_times -ne $recheck_times ; do
+				loop_count=0
+				for id in $pid
+ 				do
+					if kill -0 $id 2>/dev/null ;then
+						:
+					else
+						loop_count=`expr $loop_count - 1`
+					fi
+					loop_count=`expr $loop_count + 1`
+				done
+				if [ "$loop_count" == "0" ]; then
+					rm -f $pidfile
+					echo "OK: $name is stopped"
+					return 0
+				fi
+					
+				curcheck_times=`expr $curcheck_times + 1`
+				sleep $check_timeout
+			done
+				echo "error: $name is still running"
+				exit 3
+		else
+			echo "error: failed to stop $name"
+			exit 3
+		fi
+	else
+		echo "warning: $name is NOT running"
+	fi
+}
+
+function restart()
+{
+	stop $1
+	start $1
+}
+
+function status()
+{
+	ps -ef | grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep >/dev/null 2>&1
+
+	if [ "$?" == "0" ]; then
+		ps -ef | grep "mysql-proxy --defaults-file=.*/conf/$1.cnf" | grep -v grep | awk '{print $2}' | while read proxy_pid; do
+			echo "$name is running ($proxy_pid)"
+		done
+	else
+		echo "$name is NOT running"
+	fi
+}
+
+case $2 in
+	"start")
+		start $1
+		;;  
+
+	"stop")
+		stop $1
+		;;
+
+	"restart")
+		restart $1
+		;;
+
+	"status")
+		status $1
+		;;
+	*)
+		echo "Usage: $0 instance {start|stop|restart|status}"
+		exit 1 
+esac
+
+exit 0
