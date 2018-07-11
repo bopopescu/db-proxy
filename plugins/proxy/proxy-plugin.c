@@ -432,10 +432,34 @@ int strtotime(char* datetime) {
 #define SPLIT_TABLE_TYPE_YEAR_MONTH_DAY 6
 
 int str_format(char* time, GString* result, int type) {
-	struct tm tm; 
-    char buf[255] = {0};
-    strptime(time, "%Y-%m-%d %H:%:M:%S" , &tm);
+	struct tm tm, *tm2;
+    time_t t;
 
+    char buf[255] = {0};
+       
+    int i;
+
+    /*
+    1 timestamp
+    2 date
+    */
+    int  is_timestamp = 1;
+    
+    for(i = 0; time[i] != 0; i++) {
+        if ( !isdigit(time[i])) {
+            is_timestamp = 2;
+            break;
+        }
+    }
+
+    if( 1 == is_timestamp ) {
+        t = strtoull(time, NULL , 10) + 28800;
+        tm2 = gmtime(&t);
+        tm = *tm2;
+    } else {
+         strptime(time, "%Y-%m-%d %H:%:M:%S" , &tm);
+    }
+       
 	switch(type) {
 		case 3:
 			strftime(buf, sizeof(buf), "%Y", &tm);
@@ -453,7 +477,6 @@ int str_format(char* time, GString* result, int type) {
 			break;
 	}
 
-    strftime(buf, sizeof(buf), "%Y", &tm);
 	g_string_append(result, buf);
 
 	return 0;
@@ -838,46 +861,46 @@ GArray* get_column_index(GPtrArray* tokens, gchar* table_name, gchar* column_nam
 				*/
 				if (  ( strcasecmp(str, ",") == 0 && strcasecmp(ts[i+1]->text->str, "(") == 0 )  || i+1 == len) {
 					nums++;
-
-					if(i+1 ==len){
-						seg = i+1 - k;
-						g_string_append_c(sql_new, ')');
-					}else{
-						 seg = i - k;
-					}
-
-					/*
-					ts[seg]->text->str 分表字段对应的值
-					*/
-					time = g_string_new(NULL);
-					str_format(ts[seg]->text->str, time, split_table_method);
-
-
-                    g_log_dbproxy(g_message, "分表字段的值为: %s, 编号为: %d= %d-%d, 该逗号之前分组中的数据为: %s" , ts[seg]->text->str, seg, i , k, sql_new->str);
-					
-					/*
-					组合分表名称
-					*/
-					char table_depart[200] = {0};
-                    sprintf(table_depart, "%s_%s", table_name, time->str);
-					g_string_free(time, TRUE);
-
-					/*
-					逗号前面这组数据
-					*/
-                    g_log_dbproxy(g_message, "分表名称: %s, 值: %s", table_depart, sql_new->str);
-			//g_hash_table_insert(array, strdup(table_depart),  g_slist_append(g_hash_table_lookup(array, table_depart), strdup(sql_new->str)));
-
-					g_string_free(sql_new, TRUE);
-
-					sql_new = g_string_new(&op);
-	
-//				    g_log_dbproxy(g_message, "!!!!!!!!!! %d = %d + %d ", seg, i,  trans); 
-					
-					/*
-					批量插入的columns, 只为和单条insert 区分开
-					*/
-					g_array_append_val(columns, seg);
+//
+//					if(i+1 ==len){
+//						seg = i+1 - k;
+//						g_string_append_c(sql_new, ')');
+//					}else{
+//						 seg = i - k;
+//					}
+//
+//					/*
+//					ts[seg]->text->str 分表字段对应的值
+//					*/
+//					time = g_string_new(NULL);
+//					str_format(ts[seg]->text->str, time, split_table_method);
+//
+//
+//                    g_log_dbproxy(g_message, "分表字段的值为: %s, 编号为: %d= %d-%d, 该逗号之前分组中的数据为: %s" , ts[seg]->text->str, seg, i , k, sql_new->str);
+//					
+//					/*
+//					组合分表名称
+//					*/
+//					char table_depart[200] = {0};
+//                    sprintf(table_depart, "%s_%s", table_name, time->str);
+//					g_string_free(time, TRUE);
+//
+//					/*
+//					逗号前面这组数据
+//					*/
+//                    g_log_dbproxy(g_message, "分表名称: %s, 值: %s", table_depart, sql_new->str);
+//			//g_hash_table_insert(array, strdup(table_depart),  g_slist_append(g_hash_table_lookup(array, table_depart), strdup(sql_new->str)));
+//
+//					g_string_free(sql_new, TRUE);
+//
+//					sql_new = g_string_new(&op);
+//	
+////				    g_log_dbproxy(g_message, "!!!!!!!!!! %d = %d + %d ", seg, i,  trans); 
+//					
+//					/*
+//					批量插入的columns, 只为和单条insert 区分开
+//					*/
+//					g_array_append_val(columns, seg);
 
 				} else if (  i == len-1) {
 //                        g_string_append_printf(sql_new, "%s", str);
@@ -891,28 +914,31 @@ GArray* get_column_index(GPtrArray* tokens, gchar* table_name, gchar* column_nam
 						如果当前值为 , ( ) 则不需要加引号
 						同时, 如果当前值为左括号(,  插入snowflake_id
 						*/
-                        g_string_append_printf(sql_new , "%s", str);
+//                        g_string_append_printf(sql_new , "%s", str);
 						if(strcmp(str, "(") == 0) {
 							//分表中的 uuid
-							unique_id = snowflake_id();
-							g_string_append_printf(sql_new, "%ld, ", unique_id);
+//							unique_id = snowflake_id();
+//							g_string_append_printf(sql_new, "%ld, ", unique_id);
 							
 							char msg[100] = {0};
 							g_log_dbproxy(g_message, "bbbbbbbbbbbbbbbbbb "); 
 							sprintf(msg, "%d_%d_%d", i + single_insert_gap2, i, i + close_open_diff);
-							 char* a = strdup(msg);
-						 g_array_append_val(array, a);
+
+							char* a = strdup(msg);
+						    g_array_append_val(array, a);
 						}
                     } else {
 						/*
 						否则加上引号
 						*/
-					    g_string_append_printf(sql_new, "'%s'", str);
+//					    g_string_append_printf(sql_new, "'%s'", str);
                     }
 					g_log_dbproxy(g_message, "当前值为%s", sql_new->str); 
 
 				} 
             }
+columns->len = 10;
+
 			  for (i = 0; i < array->len; i++) {
 					g_log_dbproxy(g_message,"AAAAAAAAAAAAAAAAAAAA %s", g_array_index(array, char*, i));
 				}
@@ -1155,14 +1181,6 @@ GPtrArray* combine_sql(GPtrArray* tokens, gint table, GArray* columns, guint num
 				unique_id = snowflake_id();
 				g_string_append_printf(sql, "set id=%ld, ", unique_id);
 			}else {
-                
-				if(strcmp(ts[i]->text->str, "revoke") == 0){
-					g_string_append(sql, "`revoke`");
-				} else {
-					g_string_append(sql, ts[i]->text->str);
-				}
-
-				g_log_dbproxy(g_message, "当前值为: %s", ts[i]->text->str); 
 				
 				/*
 				zhangming 2018/1/1  23:46
@@ -1173,15 +1191,30 @@ GPtrArray* combine_sql(GPtrArray* tokens, gint table, GArray* columns, guint num
                 zhangming 2018/7/9 21:44
                 不存在此问题, 同上
 				*/
-			
-				gchar* str = ts[i]->text->str;
+			    
+                /*
+				zhangming 2018/7/11 15:22
+				where name="abc"
+				这里是 name 
+				详见https://github.com/Qihoo360/Atlas/blob/128b0544cefc800366f70e534c5130f35574721c/lib/sql-tokenizer.h
+				*/
 
-				if(0 == count && strcmp(str, "(") == 0 ) {
-					g_string_append(sql, "id,");
-					count++;
-				}else if(1 == count && strcmp(str, "(") == 0 ) {
-					unique_id = snowflake_id();
-					g_string_append_printf(sql, "%ld,", unique_id);
+				if ( token_id== TK_LITERAL) {
+					g_string_append_printf(sql, "`%s`", ts[i]->text->str);
+				} else {
+					g_string_append(sql, ts[i]->text->str);
+				}
+				g_log_dbproxy(g_message, "当前值为: %s", ts[i]->text->str); 
+				
+				if (3 == sql_type) {
+					gchar* str = ts[i]->text->str;
+					if(0 == count && strcmp(str, "(") == 0 ) {
+						g_string_append(sql, "id,");
+						count++;
+					}else if(1 == count && strcmp(str, "(") == 0 ) {
+						unique_id = snowflake_id();
+						g_string_append_printf(sql, "%ld,", unique_id);
+					}
 				}
             }
         }
@@ -1321,12 +1354,12 @@ GPtrArray* combine_sql(GPtrArray* tokens, gint table, GArray* columns, guint num
                     val = strtoull(ts[split_column_pos]->text->str, NULL, 10) % num;
                     g_string_append_printf(time, "%d", val);
                 } else {
-                    
                     str_format(ts[split_column_pos]->text->str, time, split_table_method);
                 }
 
                 tmp = g_string_new(NULL);
                 sql_token_id token_id;
+
                 for (j = open_pos; j <= close_pos; ++j) {
                     token_id = ts[j]->token_id;
 
@@ -1376,6 +1409,8 @@ GPtrArray* combine_sql(GPtrArray* tokens, gint table, GArray* columns, guint num
 
             GHashTableIter iter;
             gpointer key, value;
+            GSList* list = NULL;
+            GSList* iterator = NULL; 
 
             g_hash_table_iter_init (&iter, hash);
 
@@ -1386,20 +1421,20 @@ GPtrArray* combine_sql(GPtrArray* tokens, gint table, GArray* columns, guint num
                 // do something with key and value
                 g_log_dbproxy(g_message, "hash_table循环: 数据表: %s", key);
 
-                GSList* list = (GSList*)value;
-                GSList* iterator = NULL;
+                list = (GSList*)value;
+                iterator = NULL;
                 
                 sql = 	 g_string_new(&op);
 
-                 for (iterator=list; iterator; iterator=iterator->next) {
+                for (iterator=list; iterator; iterator=iterator->next) {
                     g_string_append_printf(sql, "INSERT INTO %s_%s %s VALUES %s", ts[table]->text->str, key, columns_str->str, strdup(strstr(iterator->data, "(")));
-                 }
+                }
 
-                  g_ptr_array_add(sqls, sql);
+                g_log_dbproxy(g_message, "批量insert sql为:%s", sql->str);
+                g_ptr_array_add(sqls, sql);
             }
 
             //g_string_append(sql, "insert into user(name , create_time) values('zm','2018-7-8 00:00:01'), ('zm2', '2018-7-9 00:00:01')");
-            
             g_hash_table_foreach(hash, destroy, NULL);
             g_hash_table_destroy(hash);
 
@@ -5574,8 +5609,11 @@ show_select_where_limit(void *ex_param)
     }
 }
 
-static gint
-add_shard_tables(chassis_plugin_config *config, gchar **shard_tables)
+/*
+zhangming 2018/7/11 21:28:48
+命令: add tables 
+*/
+static gint add_shard_tables(chassis_plugin_config *config, gchar **shard_tables)
 {
     gint i = 0;
     for (i = 0; shard_tables && shard_tables[i]; i++) {
@@ -5601,12 +5639,16 @@ add_shard_tables(chassis_plugin_config *config, gchar **shard_tables)
 						}else{
 							dt->split_table_method =1;
 						}
-                        if (dt->table_num > 0) {
-                        is_complete = TRUE;
+
+                        /*
+                        timestamp 按年, 年月, 年月日分表, 控制台设置的分表个数为0
+                        */
+                        if (dt->table_num >= 0) {
+                            is_complete = TRUE;
+                        }
                     }
                 }
             }
-        }
         }
 
         g_free(tmp_for_free);

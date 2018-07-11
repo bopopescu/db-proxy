@@ -1025,8 +1025,12 @@ chassis_options_save(GKeyFile *keyfile, chassis_options_t *opts, chassis  *chas)
     return 0;
 }
 
-int
-save_config(chassis *chas) {
+/*
+zhangming 2018/7/11 22:00
+保存配置文件
+命令: save config
+*/
+int save_config(chassis *chas) {
     GKeyFile *keyfile = g_key_file_new();
     network_backends_t *bs = chas->backends;
 
