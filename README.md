@@ -2,7 +2,7 @@
 
 修改美团dbproxy源码
 
-### 若SQL包含`关键字`, 词法分析会去掉`, 这里判断 token_id== TK_LITERAL,则加上`<br/>
+# 若SQL包含`关键字`, 词法分析会去掉`, 这里判断 token_id== TK_LITERAL,则加上`<br/>
 2.增加批量insert功能<br/>
 3.增加按字符串(hash)分表功能<br/>
 4.增加按时间字段分表功能<br/>
