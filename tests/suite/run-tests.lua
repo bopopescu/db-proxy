@@ -806,7 +806,7 @@ end
 --
 -- @param backend_lua_script
 -- @param second_lua_script 
--- @param use_replication uses a master proxy as backend 
+-- @param use_replication uses a oligarch proxy as backend 
 function chain_proxy (backend_lua_scripts, second_lua_script, use_replication)
     local backends = { }
 

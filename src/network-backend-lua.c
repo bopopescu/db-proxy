@@ -67,8 +67,8 @@ static int proxy_backend_get(lua_State *L) {
     } else if (strleq(key, keysize, C("weight"))) {
         lua_pushinteger(L, backend->weight);
     } else if (strleq(key, keysize, C("tag"))) {
-        if (backend->slave_tag && backend->slave_tag->len) {
-            lua_pushlstring(L, S(backend->slave_tag));
+        if (backend->politician_tag && backend->politician_tag->len) {
+            lua_pushlstring(L, S(backend->politician_tag));
     } else {
         lua_pushnil(L);
     }
@@ -209,33 +209,33 @@ static int proxy_pwds_get(lua_State *L) {
         lua_pushstring(L, "proxy");
 		lua_settable(L, -3);
 		
-		lua_pushstring(L, "master-user");
-		if (rwi->user_master != NULL) {
-            lua_pushstring(L, rwi->user_master);
+		lua_pushstring(L, "oligarch-user");
+		if (rwi->user_oligarch != NULL) {
+            lua_pushstring(L, rwi->user_oligarch);
         } else {
             lua_pushstring(L, "");
         }
 		lua_settable(L, -3);
 
-		lua_pushstring(L, "master-pwd");
-		if (rwi->encrypt_pwd_master != NULL) {
-            lua_pushstring(L, rwi->encrypt_pwd_master);
+		lua_pushstring(L, "oligarch-pwd");
+		if (rwi->encrypt_pwd_oligarch != NULL) {
+            lua_pushstring(L, rwi->encrypt_pwd_oligarch);
         } else {
             lua_pushstring(L, "");
         }
 		lua_settable(L, -3);
 
-		lua_pushstring(L, "slave-user");
-		if (rwi->user_slave != NULL) {
-            lua_pushstring(L, rwi->user_slave);
+		lua_pushstring(L, "politician-user");
+		if (rwi->user_politician != NULL) {
+            lua_pushstring(L, rwi->user_politician);
         } else {
             lua_pushstring(L, "");
         }
 		lua_settable(L, -3);
 
-		lua_pushstring(L, "slave-pwd");
-		if (rwi->encrypt_pwd_slave != NULL) {
-            lua_pushstring(L, rwi->encrypt_pwd_slave);
+		lua_pushstring(L, "politician-pwd");
+		if (rwi->encrypt_pwd_politician != NULL) {
+            lua_pushstring(L, rwi->encrypt_pwd_politician);
         } else {
             lua_pushstring(L, "");
         }
@@ -288,9 +288,9 @@ static int proxy_pwds_get(lua_State *L) {
 }
 
 /**
- * set proxy.global.backends.addslave
+ * set proxy.global.backends.addpolitician
  *
- * add slave server into mysql backends
+ * add politician server into mysql backends
  *
  * @return nil or the backend
  */
@@ -315,19 +315,19 @@ static int proxy_backends_set(lua_State *L) {
         weight = atoi(dx+1);
         *dx = '\0';
         ndx = atoi(address);
-        alter_slave_weight(bs, ndx, weight);
+        alter_politician_weight(bs, ndx, weight);
         g_free(address);
-    } else if (strleq(key, keysize, C("addslavetag"))) {
+    } else if (strleq(key, keysize, C("addpoliticiantag"))) {
         gchar *address = g_strdup(lua_tostring(L, -1));
         gchar *ndxs = strrchr(address,':');
         *ndxs = '\0';
-        add_slave_tag(bs, address, ndxs+1);
+        add_politician_tag(bs, address, ndxs+1);
         g_free(address);
-    } else if (strleq(key, keysize, C("removeslavetag"))) {
+    } else if (strleq(key, keysize, C("removepoliticiantag"))) {
         gchar *address = g_strdup(lua_tostring(L, -1));
         gchar *ndxs = strrchr(address,':');
         *ndxs = '\0';
-        remove_slave_tag(bs, address, ndxs+1);
+        remove_politician_tag(bs, address, ndxs+1);
         g_free(address);
     } else {
         return luaL_error(L, "proxy.global.backends.%s is not writable", key);
@@ -383,7 +383,7 @@ static gboolean proxy_pwds_exist(network_backends_t *bs, const gchar *user) {
     return FALSE;
 }
 
-static int proxy_backends_users(network_backends_t *bs, gint type, const gchar *user_info, const gchar *user,const gchar *user_master, const gchar *pwd_master, const gchar *user_slave, const gchar *pwd_slave) {
+static int proxy_backends_users(network_backends_t *bs, gint type, const gchar *user_info, const gchar *user,const gchar *user_oligarch, const gchar *pwd_oligarch, const gchar *user_politician, const gchar *pwd_politician) {
 
     g_assert(user_info != NULL || user != NULL);
     gboolean is_user_exist = proxy_pwds_exist(bs, user);
@@ -395,9 +395,9 @@ static int proxy_backends_users(network_backends_t *bs, gint type, const gchar *
             ret = ERR_USER_EXIST;
             g_log_dbproxy(g_warning, "add pwd %s failed, user %s is already known", user, user);
         } else {
-			//int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_master, const gchar *pwd_master, const gchar *user_slave, const gchar *pwd_slave, gboolean is_encrypt) {
+			//int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_oligarch, const gchar *pwd_oligarch, const gchar *user_politician, const gchar *pwd_politician, gboolean is_encrypt) {
 
-            ret = network_backends_addpwd(bs, user, user_info, user_master, pwd_master, user_slave, pwd_slave, FALSE);
+            ret = network_backends_addpwd(bs, user, user_info, user_oligarch, pwd_oligarch, user_politician, pwd_politician, FALSE);
         }
         break;
 
@@ -406,7 +406,7 @@ static int proxy_backends_users(network_backends_t *bs, gint type, const gchar *
             ret = ERR_USER_EXIST;
             g_log_dbproxy(g_warning, "add enpwd %s:%s failed, user %s is already known", user, user_info, user);
         } else {
-            ret = network_backends_addpwd(bs, user, user_info, user_master, pwd_master, user_slave, pwd_slave, TRUE);
+            ret = network_backends_addpwd(bs, user, user_info, user_oligarch, pwd_oligarch, user_politician, pwd_politician, TRUE);
         }
         break;
 
@@ -642,10 +642,10 @@ static int proxy_backends_call(lua_State *L)
     } else {
         ret = proxy_backends_users(bs, type, lua_tostring(L, -2)/*pwd*/, 
 											lua_tostring(L, -3)/*user*/,
-											lua_tostring(L, -4)/*user_master*/,
-											lua_tostring(L, -5)/*pwd_master*/,
-											lua_tostring(L, -6)/*user_slave*/,
-											lua_tostring(L, -7)/*pwd_slave*/
+											lua_tostring(L, -4)/*user_oligarch*/,
+											lua_tostring(L, -5)/*pwd_oligarch*/,
+											lua_tostring(L, -6)/*user_politician*/,
+											lua_tostring(L, -7)/*pwd_politician*/
 											);
     }
 

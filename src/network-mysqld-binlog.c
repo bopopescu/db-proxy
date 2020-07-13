@@ -198,7 +198,7 @@ int network_mysqld_proto_get_binlog_event(network_packet *packet,
         err = err || network_mysqld_proto_get_int16(packet, &event->event.format_event.binlog_version);
         err = err || network_mysqld_proto_get_string_len( /* NUL-term string */
                 packet, 
-                &event->event.format_event.master_version,
+                &event->event.format_event.oligarch_version,
                 ST_SERVER_VER_LEN);
         err = err || network_mysqld_proto_get_int32(packet, 
                 &event->event.format_event.created_ts);
@@ -208,7 +208,7 @@ int network_mysqld_proto_get_binlog_event(network_packet *packet,
         g_assert_cmpint(event->event.format_event.log_header_len, ==, 19);
 
         /* decode the server-version string into a integer */
-        err = err || (3 != sscanf(event->event.format_event.master_version, "%d.%d.%d%*s", &maj, &min, &pat));
+        err = err || (3 != sscanf(event->event.format_event.oligarch_version, "%d.%d.%d%*s", &maj, &min, &pat));
         err = err || (maj > 100 || maj < 0);
         err = err || (min > 100 || min < 0);
         err = err || (pat > 100 || pat < 0);
@@ -444,7 +444,7 @@ void network_mysqld_binlog_event_free(network_mysqld_binlog_event *event) {
         if (event->event.rotate_event.binlog_file) g_free(event->event.rotate_event.binlog_file);
         break;
     case FORMAT_DESCRIPTION_EVENT:
-        if (event->event.format_event.master_version) g_free(event->event.format_event.master_version);
+        if (event->event.format_event.oligarch_version) g_free(event->event.format_event.oligarch_version);
         if (event->event.format_event.perm_events) g_free(event->event.format_event.perm_events);
         break;
     case USER_VAR_EVENT:

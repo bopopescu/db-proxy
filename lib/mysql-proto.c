@@ -31,7 +31,7 @@
 #include "network-mysqld-proto.h"
 #include "network-mysqld-packet.h"
 #include "network_mysqld_type.h"
-#include "network-mysqld-masterinfo.h"
+#include "network-mysqld-oligarchinfo.h"
 #include "glib-ext.h"
 #include "lua-env.h"
 
@@ -162,10 +162,10 @@ static int lua_proto_get_ok_packet (lua_State *L) {
     return 1;
 }
 
-static int lua_proto_get_masterinfo_string (lua_State *L) {
+static int lua_proto_get_oligarchinfo_string (lua_State *L) {
     size_t packet_len;
     const char *packet_str = luaL_checklstring(L, 1, &packet_len);
-    network_mysqld_masterinfo_t *info;
+    network_mysqld_oligarchinfo_t *info;
 
     network_packet packet;
     GString s;
@@ -177,69 +177,69 @@ static int lua_proto_get_masterinfo_string (lua_State *L) {
     packet.data = &s;
     packet.offset = 0;
 
-    info = network_mysqld_masterinfo_new();
+    info = network_mysqld_oligarchinfo_new();
 
-    err = err || network_mysqld_masterinfo_get(&packet, info);
+    err = err || network_mysqld_oligarchinfo_get(&packet, info);
     
     if (err) {
-        network_mysqld_masterinfo_free(info);
-        luaL_error(L, "%s: network_mysqld_masterinfo_get() failed", G_STRLOC);
+        network_mysqld_oligarchinfo_free(info);
+        luaL_error(L, "%s: network_mysqld_oligarchinfo_get() failed", G_STRLOC);
         return 0;
     }
 
     lua_newtable(L);
         
-        LUA_EXPORT_INT(info, master_lines);
-    LUA_EXPORT_STR(info, master_log_file);
-    LUA_EXPORT_INT(info, master_log_pos);
-    LUA_EXPORT_STR(info, master_host);
-    LUA_EXPORT_STR(info, master_user);
-    LUA_EXPORT_STR(info, master_password);
-    LUA_EXPORT_INT(info, master_port);
-    LUA_EXPORT_INT(info, master_connect_retry);
-    LUA_EXPORT_INT(info, master_ssl);
-        LUA_EXPORT_STR(info, master_ssl_ca);
-        LUA_EXPORT_STR(info, master_ssl_capath);
-        LUA_EXPORT_STR(info, master_ssl_cert);
-        LUA_EXPORT_STR(info, master_ssl_cipher);
-        LUA_EXPORT_STR(info, master_ssl_key);
-        if (info->master_lines >= 15) {
-        LUA_EXPORT_INT(info, master_ssl_verify_server_cert);
+        LUA_EXPORT_INT(info, oligarch_lines);
+    LUA_EXPORT_STR(info, oligarch_log_file);
+    LUA_EXPORT_INT(info, oligarch_log_pos);
+    LUA_EXPORT_STR(info, oligarch_host);
+    LUA_EXPORT_STR(info, oligarch_user);
+    LUA_EXPORT_STR(info, oligarch_password);
+    LUA_EXPORT_INT(info, oligarch_port);
+    LUA_EXPORT_INT(info, oligarch_connect_retry);
+    LUA_EXPORT_INT(info, oligarch_ssl);
+        LUA_EXPORT_STR(info, oligarch_ssl_ca);
+        LUA_EXPORT_STR(info, oligarch_ssl_capath);
+        LUA_EXPORT_STR(info, oligarch_ssl_cert);
+        LUA_EXPORT_STR(info, oligarch_ssl_cipher);
+        LUA_EXPORT_STR(info, oligarch_ssl_key);
+        if (info->oligarch_lines >= 15) {
+        LUA_EXPORT_INT(info, oligarch_ssl_verify_server_cert);
     }
     
-    network_mysqld_masterinfo_free(info);
+    network_mysqld_oligarchinfo_free(info);
 
     return 1;
 }
 
-static int lua_proto_append_masterinfo_string (lua_State *L) {
+static int lua_proto_append_oligarchinfo_string (lua_State *L) {
         GString *packet;
-        network_mysqld_masterinfo_t *info;
+        network_mysqld_oligarchinfo_t *info;
 
         luaL_checktype(L, 1, LUA_TTABLE);
 
-        info = network_mysqld_masterinfo_new();
+        info = network_mysqld_oligarchinfo_new();
 
-        LUA_IMPORT_INT(info, master_lines);
-        LUA_IMPORT_STR(info, master_log_file);
-        LUA_IMPORT_INT(info, master_log_pos);
-        LUA_IMPORT_STR(info, master_host);
-        LUA_IMPORT_STR(info, master_user);
-        LUA_IMPORT_STR(info, master_password);
-        LUA_IMPORT_INT(info, master_port);
-        LUA_IMPORT_INT(info, master_connect_retry);
-        LUA_IMPORT_INT(info, master_ssl);
-        LUA_IMPORT_STR(info, master_ssl_ca);
-        LUA_IMPORT_STR(info, master_ssl_capath);
-        LUA_IMPORT_STR(info, master_ssl_cert);
-        LUA_IMPORT_STR(info, master_ssl_cipher);
-        LUA_IMPORT_STR(info, master_ssl_key);
-        LUA_IMPORT_INT(info, master_ssl_verify_server_cert);
+        LUA_IMPORT_INT(info, oligarch_lines);
+        LUA_IMPORT_STR(info, oligarch_log_file);
+        LUA_IMPORT_INT(info, oligarch_log_pos);
+        LUA_IMPORT_STR(info, oligarch_host);
+        LUA_IMPORT_STR(info, oligarch_user);
+        LUA_IMPORT_STR(info, oligarch_password);
+        LUA_IMPORT_INT(info, oligarch_port);
+        LUA_IMPORT_INT(info, oligarch_connect_retry);
+        LUA_IMPORT_INT(info, oligarch_ssl);
+        LUA_IMPORT_STR(info, oligarch_ssl_ca);
+        LUA_IMPORT_STR(info, oligarch_ssl_capath);
+        LUA_IMPORT_STR(info, oligarch_ssl_cert);
+        LUA_IMPORT_STR(info, oligarch_ssl_cipher);
+        LUA_IMPORT_STR(info, oligarch_ssl_key);
+        LUA_IMPORT_INT(info, oligarch_ssl_verify_server_cert);
 
         packet = g_string_new(NULL);
-        network_mysqld_masterinfo_append(packet, info);
+        network_mysqld_oligarchinfo_append(packet, info);
 
-        network_mysqld_masterinfo_free(info);
+        network_mysqld_oligarchinfo_free(info);
 
         lua_pushlstring(L, S(packet));
 
@@ -760,8 +760,8 @@ static const struct luaL_reg mysql_protolib[] = {
     {"to_challenge_packet", lua_proto_append_challenge_packet},
     {"from_response_packet", lua_proto_get_response_packet},
     {"to_response_packet", lua_proto_append_response_packet},
-    {"from_masterinfo_string", lua_proto_get_masterinfo_string},
-        {"to_masterinfo_string", lua_proto_append_masterinfo_string},
+    {"from_oligarchinfo_string", lua_proto_get_oligarchinfo_string},
+        {"to_oligarchinfo_string", lua_proto_append_oligarchinfo_string},
     {"from_stmt_prepare_packet", lua_proto_get_stmt_prepare_packet},
     {"from_stmt_prepare_ok_packet", lua_proto_get_stmt_prepare_ok_packet},
     {"from_stmt_execute_packet", lua_proto_get_stmt_execute_packet},

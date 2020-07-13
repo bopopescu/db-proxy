@@ -1,6 +1,6 @@
 #include <stdio.h>
 /*
- * https://github.com/erans/redissnowflake/blob/master/stats.h
+ * https://github.com/erans/redissnowflake/blob/oligarch/stats.h
  * */
 #include <stdlib.h>
 #include "snowflake.h"

@@ -23,10 +23,10 @@ proxy-read-only-backend-addresses=10.99.1.151:3306@4,10.99.1.120:3306@6
 #dbproxy账号密码与real 主mysql 和 从mysql 隔离
 dbproxy-user=test
 dbproxy-pwd=7O7YJJEK
-master-user = wheat
-master-pwd = 7O7YJJEK
-slave-user = wheat
-slave-pwd = 7O7YJJEK
+oligarch-user = wheat
+oligarch-pwd = 7O7YJJEK
+politician-user = wheat
+politician-pwd = 7O7YJJEK
 
 #设置dbproxy的运行方式，设为true时为守护进程方式，设为false时为前台方式，一般开发调试时设为false，线上运行时设为true
 daemon=true

@@ -933,7 +933,7 @@ int main_cmdline(int argc, char **argv) {
     }
 	 g_log_dbproxy(g_message, "!!!!!!!!!!!!!!!!!!!!!! main_cmdline");
 	 /*
-	 src/D:\study学习\DBProxy-master\DBProxy-master\src\chassis-frontend.c
+	 src/D:\study学习\DBProxy-oligarch\DBProxy-oligarch\src\chassis-frontend.c
 	 zhangming 2018/1/16 22:21
 	 int chassis_frontend_init_plugins(GPtrArray *plugins,
         GOptionContext *option_ctx,

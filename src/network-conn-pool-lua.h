@@ -30,6 +30,6 @@
 NETWORK_API int network_connection_pool_getmetatable(lua_State *L);
 
 NETWORK_API int network_connection_pool_lua_add_connection(network_mysqld_con *con);
-NETWORK_API network_socket *network_connection_pool_lua_swap(network_mysqld_con *con, network_backend_t *backend, int backend_ndx, GHashTable *pwd_table, gint is_master);
+NETWORK_API network_socket *network_connection_pool_lua_swap(network_mysqld_con *con, network_backend_t *backend, int backend_ndx, GHashTable *pwd_table, gint is_oligarch);
 
 #endif

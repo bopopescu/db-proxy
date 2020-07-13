@@ -75,7 +75,7 @@ end
 if not proxy.global.config.rwsplit then update_rwsplit() end
 
 ---
--- read/write splitting sends all non-transactional SELECTs to the slaves
+-- read/write splitting sends all non-transactional SELECTs to the politicians
 --
 -- is_in_transaction tracks the state of the transactions
 local is_in_transaction       = false
@@ -194,7 +194,7 @@ function connect_server()
         write_log(level.INFO, "  [", i, "].type = ", s.type)    --type 的类型是enum backend_type_t
         write_log(level.INFO, "  [", i, "].state = ", s.state)  --state的类型是enum backend_state_t
 
-        -- prefer connections to the master
+        -- prefer connections to the oligarch
         if s.type == proxy.BACKEND_TYPE_RW and
            s.state ~= proxy.BACKEND_STATE_DOWN and
            s.state ~= proxy.BACKEND_STATE_OFFLINE and
@@ -217,9 +217,9 @@ function connect_server()
 
     if proxy.connection.backend_ndx == 0 then   --backend_ndx对应network_mysqld_con_lua_t.backend_ndx，若为0说明上面的判断走的第3条路径
         if is_debug then
-            print("  [" .. rw_ndx .. "] taking master as default")  --从master的连接池里取一个连接
+            print("  [" .. rw_ndx .. "] taking oligarch as default")  --从oligarch的连接池里取一个连接
         end
-        write_log(level.INFO, "  [", rw_ndx, "] taking master as default")  --从master的连接池里取一个连接
+        write_log(level.INFO, "  [", rw_ndx, "] taking oligarch as default")  --从oligarch的连接池里取一个连接
         proxy.connection.backend_ndx = rw_ndx
     end
 
@@ -231,9 +231,9 @@ function connect_server()
 
     if proxy.connection.server then --connection又对应回了结构network_mysqld_con？ 
         if is_debug then
-            print("  using pooled connection from: " .. proxy.connection.backend_ndx)   --从master的连接池里取一个连接返回给客户端
+            print("  using pooled connection from: " .. proxy.connection.backend_ndx)   --从oligarch的连接池里取一个连接返回给客户端
         end
-        write_log(level.INFO, "  using pooled connection from: ", proxy.connection.backend_ndx) --从master的连接池里取一个连接返回给客户端
+        write_log(level.INFO, "  using pooled connection from: ", proxy.connection.backend_ndx) --从oligarch的连接池里取一个连接返回给客户端
         write_log(level.DEBUG, "LEAVE CONNECT_SERVER")
 
         -- stay with it
@@ -374,7 +374,7 @@ function read_query( packet )
 
     -- read/write splitting 
     --
-    -- send all non-transactional SELECTs to a slave
+    -- send all non-transactional SELECTs to a politician
     if not is_in_transaction and not is_in_lock and
        cmd.type == proxy.COM_QUERY then
         --tokens     = tokens or assert(tokenizer.tokenize(cmd.query))
@@ -417,9 +417,9 @@ function read_query( packet )
             if proxy.connection.backend_ndx == 0 then
                 if not is_insert_id then
                     if attr == 1 or is_in_lock then
-                        proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的master机器的序号
+                        proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的oligarch机器的序号
                     else
-                    --  local backend_ndx = lb.idle_ro()    --idle_ro定义在balance.lua里，返回当前连接的客户端数量最少的slave机器的序号
+                    --  local backend_ndx = lb.idle_ro()    --idle_ro定义在balance.lua里，返回当前连接的客户端数量最少的politician机器的序号
                         if proxy.global.config.rwsplit.max_weight == -1 then update_rwsplit() end
                         local backend_ndx = lb.cycle_read_ro()
 
@@ -428,7 +428,7 @@ function read_query( packet )
                         end
                     end
                 else
-                    proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的master机器的序号
+                    proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的oligarch机器的序号
                 --  print("   found a SELECT LAST_INSERT_ID(), staying on the same backend")
                 end
             end
@@ -440,18 +440,18 @@ function read_query( packet )
         proxy.connection.backend_ndx = lb.cycle_read_ro()
     end
 
-    -- no backend selected yet, pick a master
+    -- no backend selected yet, pick a oligarch
     if proxy.connection.backend_ndx == 0 then
         -- we don't have a backend right now
         -- 
-        -- let's pick a master as a good default
+        -- let's pick a oligarch as a good default
         --
-        proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的master机器的序号
+        proxy.connection.backend_ndx = lb.idle_failsafe_rw()    --idle_failsafe_rw定义在balance.lua里，返回第一台池不为空的oligarch机器的序号
     end
 
     -- by now we should have a backend
     --
-    -- in case the master is down, we have to close the client connections
+    -- in case the oligarch is down, we have to close the client connections
     -- otherwise we can go on
     if proxy.connection.backend_ndx == 0 then   --所有backend状态都是DOWN导致的情况
         --[[
@@ -478,13 +478,13 @@ function read_query( packet )
         charset.modify_charset(tokens, c, s)
     end
 
-    -- send to master
+    -- send to oligarch
     if is_debug then
         if proxy.connection.backend_ndx > 0 then
             local b = proxy.global.backends[proxy.connection.backend_ndx]
             print("  sending to backend : " .. b.dst.name);
             print("  server src port : " .. proxy.connection.server.src.port)
-            print("    is_slave         : " .. tostring(b.type == proxy.BACKEND_TYPE_RO));
+            print("    is_politician         : " .. tostring(b.type == proxy.BACKEND_TYPE_RO));
             print("    server default db: " .. s.default_db)
             print("    server username  : " .. s.username)
         end
@@ -497,7 +497,7 @@ function read_query( packet )
         local b = proxy.global.backends[proxy.connection.backend_ndx]
         write_log(level.INFO, "  sending to backend : ", b.dst.name);
         write_log(level.INFO, "  server src port : ", proxy.connection.server.src.port)
-        write_log(level.INFO, "    is_slave         : ", tostring(b.type == proxy.BACKEND_TYPE_RO));
+        write_log(level.INFO, "    is_politician         : ", tostring(b.type == proxy.BACKEND_TYPE_RO));
         write_log(level.INFO, "    server default db: ", s.default_db)
         write_log(level.INFO, "    server username  : ", s.username)
     end
@@ -543,14 +543,14 @@ function read_query_result( inj )
         --
         local re = proxy.PROXY_IGNORE_RESULT
         if inj.id == 2 then
-            -- the injected INIT_DB failed as the slave doesn't have this DB
+            -- the injected INIT_DB failed as the politician doesn't have this DB
             -- or doesn't have permissions to read from it
             if res.query_status == proxy.MYSQLD_PACKET_ERR then
                 proxy.queries:reset()
                 proxy.response = {
                     type = proxy.MYSQLD_PACKET_ERR,
                     errmsg = "can't change DB ".. proxy.connection.client.default_db ..
-                        " to on slave " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
+                        " to on politician " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
                 }
                 re = proxy.PROXY_SEND_RESULT
             end
@@ -560,7 +560,7 @@ function read_query_result( inj )
                 proxy.response = {
                     type = proxy.MYSQLD_PACKET_ERR,
                     errmsg = "can't change charset_client " .. proxy.connection.client.charset_client ..
-                        " to on slave " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
+                        " to on politician " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
                 }
                 re = proxy.PROXY_SEND_RESULT
             end
@@ -570,7 +570,7 @@ function read_query_result( inj )
                 proxy.response = {
                     type = proxy.MYSQLD_PACKET_ERR,
                     errmsg = "can't change charset_results " .. proxy.connection.client.charset_results ..
-                        " to on slave " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
+                        " to on politician " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
                 }
                 re = proxy.PROXY_SEND_RESULT
             end
@@ -580,7 +580,7 @@ function read_query_result( inj )
                 proxy.response = {
                     type = proxy.MYSQLD_PACKET_ERR,
                     errmsg = "can't change charset_connection " .. proxy.connection.client.charset_connection ..
-                        " to on slave " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
+                        " to on politician " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name
                 }
                 re = proxy.PROXY_SEND_RESULT
             end

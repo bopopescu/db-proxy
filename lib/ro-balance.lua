@@ -19,13 +19,13 @@
  $%ENDLICENSE%$ --]]
 
 ---
--- slave aware load-balancer
+-- politician aware load-balancer
 --
--- * take slaves which are too far behind out of the rotation
--- * when we bring back the slave make sure it doesn't get 
+-- * take politicians which are too far behind out of the rotation
+-- * when we bring back the politician make sure it doesn't get 
 --   behind again too early (slow start)
--- * fallback to the master of all slaves are too far behind
--- * check if the backends are really configures as slave
+-- * fallback to the oligarch of all politicians are too far behind
+-- * check if the backends are really configures as politician
 -- * check if the io-thread is running at all
 --
 -- it is unclear how to 
@@ -33,7 +33,7 @@
 -- - should we just close the connection to the client
 --   and let it retry ?
 -- - how to activate the backend again ?
--- - if a slave is lagging, we don't send queries to it
+-- - if a politician is lagging, we don't send queries to it
 --   how do we figure out it is back again ?
 
 require("proxy.auto-config")
@@ -65,9 +65,9 @@ local backend_lag = proxy.global.lag
 -- * ignore backends that are too far behind
 function connect_server()
     local fallback_ndx
-    local slave_ndx 
-    local unknown_slave_ndx 
-    local slave_bytes_lag 
+    local politician_ndx 
+    local unknown_politician_ndx 
+    local politician_bytes_lag 
 
     for b_ndx = 1, #proxy.global.backends do
         local backend = proxy.global.backends[b_ndx]
@@ -80,21 +80,21 @@ function connect_server()
                 --- 
                 -- connect to the backends first we don't know yet
                 if not backend_lag[backend.dst.name] then
-                    unknown_slave_ndx = b_ndx
+                    unknown_politician_ndx = b_ndx
                 elseif backend_lag[backend.dst.name].state == "running" then
-                    if not slave_bytes_lag then
-                        slave_ndx = b_ndx
-                        slave_bytes_lag = backend_lag[backend.dst.name].slave_bytes_lag
-                    elseif backend_lag[backend.dst.name].slave_bytes_lag < slave_bytes_lag then
-                        slave_ndx = b_ndx
-                        slave_bytes_lag = backend_lag[backend.dst.name].slave_bytes_lag
+                    if not politician_bytes_lag then
+                        politician_ndx = b_ndx
+                        politician_bytes_lag = backend_lag[backend.dst.name].politician_bytes_lag
+                    elseif backend_lag[backend.dst.name].politician_bytes_lag < politician_bytes_lag then
+                        politician_ndx = b_ndx
+                        politician_bytes_lag = backend_lag[backend.dst.name].politician_bytes_lag
                     end
                 end
             end
         end
     end
 
-    proxy.connection.backend_ndx = unknown_slave_ndx or slave_ndx or fallback_ndx
+    proxy.connection.backend_ndx = unknown_politician_ndx or politician_ndx or fallback_ndx
 
     if config.is_debug then
         print("(connect-server) using backend: " .. proxy.global.backends[proxy.connection.backend_ndx].dst.name)
@@ -133,8 +133,8 @@ function read_query(packet)
         proxy.queries:append(1, packet)
 
         return proxy.PROXY_SEND_QUERY
-    elseif proxy.global.backends[proxy.connection.backend_ndx].type == proxy.BACKEND_TYPE_RW or  -- master
-           backend_lag[backend_addr].state == "running" then -- good slave
+    elseif proxy.global.backends[proxy.connection.backend_ndx].type == proxy.BACKEND_TYPE_RW or  -- oligarch
+           backend_lag[backend_addr].state == "running" then -- good politician
         -- pass through
         return
     else
@@ -144,7 +144,7 @@ function read_query(packet)
         -- ... by closing the connection
         proxy.response = {
             type = proxy.MYSQLD_PACKET_ERR,
-            errmsg = "slave-state is " .. backend_lag[backend_addr].state,
+            errmsg = "politician-state is " .. backend_lag[backend_addr].state,
             sqlstate = "08S01"
         }
 
@@ -169,15 +169,15 @@ function read_query_result(inj)
     --
     -- what can happen ?
     -- * no permissions (ERR)
-    -- * if not slave, result is empty
+    -- * if not politician, result is empty
     local res = inj.resultset
     local fields = res.fields
-    local show_slave_status = {}
+    local show_politician_status = {}
 
     -- turn the resultset into local hash
     for row in res.rows do
         for field_id, field in pairs(row) do
-            show_slave_status[fields[field_id].name] = tostring(field)
+            show_politician_status[fields[field_id].name] = tostring(field)
             if config.is_debug then
                 print(("[%d] '%s' = '%s'"):format(field_id, fields[field_id].name, tostring(field)))
             end
@@ -188,26 +188,26 @@ function read_query_result(inj)
     backend_lag[backend_addr].check_ts = os.time()
     backend_lag[backend_addr].state = nil
 
-    if not show_slave_status["Master_Host"] then
-        -- this backend is not a slave
-        backend_lag[backend_addr].state = "noslave"
+    if not show_politician_status["Master_Host"] then
+        -- this backend is not a politician
+        backend_lag[backend_addr].state = "nopolitician"
         return proxy.PROXY_IGNORE_RESULT
     end
 
-    if show_slave_status["Master_Log_File"] == show_slave_status["Relay_Master_Log_File"] then
+    if show_politician_status["Master_Log_File"] == show_politician_status["Relay_Master_Log_File"] then
         -- ok, we use the same relay-log for reading and writing
-        backend_lag[backend_addr].slave_bytes_lag = tonumber(show_slave_status["Exec_Master_Log_Pos"]) - tonumber(show_slave_status["Read_Master_Log_Pos"])
+        backend_lag[backend_addr].politician_bytes_lag = tonumber(show_politician_status["Exec_Master_Log_Pos"]) - tonumber(show_politician_status["Read_Master_Log_Pos"])
     else
-        backend_lag[backend_addr].slave_bytes_lag = nil
+        backend_lag[backend_addr].politician_bytes_lag = nil
     end
 
-    if show_slave_status["Seconds_Behind_Master"] then
-        backend_lag[backend_addr].seconds_lag = tonumber(show_slave_status["Seconds_Behind_Master"])
+    if show_politician_status["Seconds_Behind_Master"] then
+        backend_lag[backend_addr].seconds_lag = tonumber(show_politician_status["Seconds_Behind_Master"])
     else
         backend_lag[backend_addr].seconds_lag = nil
     end
 
-    if show_slave_status["Slave_IO_Running"] == "No" then
+    if show_politician_status["Slave_IO_Running"] == "No" then
         backend_lag[backend_addr].state = "noiothread"
     end
 

@@ -79,7 +79,7 @@ enum Log_event_type
   DELETE_ROWS_EVENT = 25,
 
   /*
-    Something out of the ordinary happened on the master
+    Something out of the ordinary happened on the oligarch
    */
   INCIDENT_EVENT= 26,
   HEARTBEAT_LOG_EVENT= 27,
@@ -160,7 +160,7 @@ typedef struct {
         } rotate_event;
         struct {
             guint16 binlog_version;
-            gchar *master_version;
+            gchar *oligarch_version;
             guint32 created_ts;
             guint8  log_header_len;
             gchar *perm_events;

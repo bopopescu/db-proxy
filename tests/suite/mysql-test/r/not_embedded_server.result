@@ -1,6 +1,6 @@
-SHOW VARIABLES like 'slave_skip_errors';
+SHOW VARIABLES like 'politician_skip_errors';
 Variable_name	Value
-slave_skip_errors	OFF
+politician_skip_errors	OFF
 #
 # Bug#58026: massive recursion and crash in regular expression handling
 #

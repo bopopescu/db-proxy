@@ -55,7 +55,7 @@ network_backend_t *network_backend_new(guint event_thread_count) {
 
     b->backend_id = next_backend_id++;
     b->uuid = g_string_new(NULL);
-    b->slave_tag = NULL;
+    b->politician_tag = NULL;
     b->addr = network_address_new();
 
     b->thread_running = 0;
@@ -77,14 +77,14 @@ void network_backend_free(network_backend_t *b) {
 
     if (b->addr)     network_address_free(b->addr);
     if (b->uuid)     g_string_free(b->uuid, TRUE);
-    if (b->slave_tag)     g_string_free(b->slave_tag, TRUE);
+    if (b->politician_tag)     g_string_free(b->politician_tag, TRUE);
 
     g_rw_lock_clear(&b->backend_lock);
     g_free(b);
 }
 
 raw_user_info *
-raw_user_info_new(const gchar *username, const gchar *encrypt_pwd, const gchar *user_hosts, gchar *backends, const gchar* user_master, const gchar* encrypt_pwd_master, const gchar* user_slave, const gchar* encrypt_pwd_slave) {
+raw_user_info_new(const gchar *username, const gchar *encrypt_pwd, const gchar *user_hosts, gchar *backends, const gchar* user_oligarch, const gchar* encrypt_pwd_oligarch, const gchar* user_politician, const gchar* encrypt_pwd_politician) {
     raw_user_info *rwi = NULL;
 
     g_assert(username != NULL);
@@ -101,11 +101,11 @@ raw_user_info_new(const gchar *username, const gchar *encrypt_pwd, const gchar *
         rwi->backends = g_strdup(backends);
     }
 
-	rwi->user_master = g_strdup(user_master);
-	rwi->encrypt_pwd_master = g_strdup(encrypt_pwd_master);
+	rwi->user_oligarch = g_strdup(user_oligarch);
+	rwi->encrypt_pwd_oligarch = g_strdup(encrypt_pwd_oligarch);
 
-	rwi->user_slave = g_strdup(user_slave);
-	rwi->encrypt_pwd_slave = g_strdup(encrypt_pwd_slave);
+	rwi->user_politician = g_strdup(user_politician);
+	rwi->encrypt_pwd_politician = g_strdup(encrypt_pwd_politician);
 
     return rwi;
 }
@@ -362,14 +362,14 @@ char *decrypt(const char *in) {    //1. Base64ﾽ￢ￂ￫
     return out;
 }
 
-int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_master, const gchar *pwd_master, const gchar *user_slave, const gchar *pwd_slave, gboolean is_encrypt) {
+int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_oligarch, const gchar *pwd_oligarch, const gchar *user_politician, const gchar *pwd_politician, gboolean is_encrypt) {
     GString *hashed_password = g_string_new(NULL);
 	/*
 	zhangming 2018/1/15 0:02
 	处理主库，从库密码
 	*/
-	GString *hashed_password_master = g_string_new(NULL);
-	GString *hashed_password_slave = g_string_new(NULL);
+	GString *hashed_password_oligarch = g_string_new(NULL);
+	GString *hashed_password_politician = g_string_new(NULL);
 
     user_info_hval  *user_hval = NULL;
     raw_user_info   *rwi = NULL;
@@ -377,35 +377,35 @@ int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gch
 
     if (is_encrypt) {
         gchar *decrypt_pwd = decrypt(pwd);
-		gchar *decrypt_pwd_master = decrypt(pwd_master);
-		gchar *decrypt_pwd_slave = decrypt(pwd_slave);
+		gchar *decrypt_pwd_oligarch = decrypt(pwd_oligarch);
+		gchar *decrypt_pwd_politician = decrypt(pwd_politician);
 
         if (decrypt_pwd == NULL) {
             g_log_dbproxy(g_critical, "failed to decrypt %s", pwd);
             return ERR_PWD_DECRYPT;
         }
         network_mysqld_proto_password_hash(hashed_password, decrypt_pwd, strlen(decrypt_pwd));
-		network_mysqld_proto_password_hash(hashed_password_master, decrypt_pwd_master, strlen(decrypt_pwd_master));
-		network_mysqld_proto_password_hash(hashed_password_slave, decrypt_pwd_slave, strlen(decrypt_pwd_slave));
+		network_mysqld_proto_password_hash(hashed_password_oligarch, decrypt_pwd_oligarch, strlen(decrypt_pwd_oligarch));
+		network_mysqld_proto_password_hash(hashed_password_politician, decrypt_pwd_politician, strlen(decrypt_pwd_politician));
 
         g_free(decrypt_pwd);
-		g_free(decrypt_pwd_master);
-		g_free(decrypt_pwd_slave);
+		g_free(decrypt_pwd_oligarch);
+		g_free(decrypt_pwd_politician);
 
         show_pwd = g_strdup(pwd);
     } else {
         gchar *encrypt_pwd = encrypt(pwd);
-		 gchar *encrypt_pwd_master = encrypt(pwd_master);
-		  gchar *encrypt_pwd_slave = encrypt(pwd_slave);
+		 gchar *encrypt_pwd_oligarch = encrypt(pwd_oligarch);
+		  gchar *encrypt_pwd_politician = encrypt(pwd_politician);
 
-        if (encrypt_pwd == NULL || encrypt_pwd_master == NULL || encrypt_pwd_slave == NULL) {
+        if (encrypt_pwd == NULL || encrypt_pwd_oligarch == NULL || encrypt_pwd_politician == NULL) {
             g_log_dbproxy(g_critical, "failed to encrypt %s", pwd);
             return ERR_PWD_ENCRYPT;
         }
 
         network_mysqld_proto_password_hash(hashed_password, pwd, strlen(pwd));
-		network_mysqld_proto_password_hash(hashed_password_master, pwd_master, strlen(pwd_master));
-		network_mysqld_proto_password_hash(hashed_password_slave, pwd_slave, strlen(pwd_slave));
+		network_mysqld_proto_password_hash(hashed_password_oligarch, pwd_oligarch, strlen(pwd_oligarch));
+		network_mysqld_proto_password_hash(hashed_password_politician, pwd_politician, strlen(pwd_politician));
 		
 		/*
 		zhangming 明天再弄
@@ -413,10 +413,10 @@ int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gch
         show_pwd = encrypt_pwd;
     }
 
-    rwi = raw_user_info_new(user, show_pwd, NULL, NULL, user_master, pwd_master, user_slave, pwd_slave);
+    rwi = raw_user_info_new(user, show_pwd, NULL, NULL, user_oligarch, pwd_oligarch, user_politician, pwd_politician);
     g_free(show_pwd);
 
-    user_hval = user_info_hval_new(hashed_password, hashed_password_master, user_master, hashed_password_slave, user_slave);
+    user_hval = user_info_hval_new(hashed_password, hashed_password_oligarch, user_oligarch, hashed_password_politician, user_politician);
 
     g_rw_lock_writer_lock(&bs->user_mgr_lock);
     if (g_hash_table_lookup(bs->pwd_table, user) == NULL) {
@@ -521,14 +521,14 @@ int network_backends_remove(network_backends_t *bs, network_backend_t *backend) 
     //    return 0;
     //}
 
-    if (backend->slave_tag != NULL) {
-        tag_backends = g_hash_table_lookup(bs->tag_backends, backend->slave_tag->str);
+    if (backend->politician_tag != NULL) {
+        tag_backends = g_hash_table_lookup(bs->tag_backends, backend->politician_tag->str);
         g_assert(tag_backends != NULL);
 
         g_ptr_array_remove(tag_backends->backends, backend);
         if (tag_backends->backends->len == 0) {
-            remove_user_tag_backend(bs, backend->slave_tag->str);
-            g_hash_table_remove(bs->tag_backends, backend->slave_tag->str);
+            remove_user_tag_backend(bs, backend->politician_tag->str);
+            g_hash_table_remove(bs->tag_backends, backend->politician_tag->str);
             tag_backends = NULL;
         }
     } else {
@@ -569,13 +569,13 @@ int network_backends_add(network_backends_t *bs, /* const */ gchar *address, bac
             *pos_tag = '\0';
             pos_weight = strrchr(pos_tag + 1, '@');
 
-            new_backend->slave_tag = g_string_new(NULL);
+            new_backend->politician_tag = g_string_new(NULL);
             if (pos_weight != NULL) {
                 *pos_weight = '\0';
                 weight = strtol(pos_weight+1, NULL, 10);
-                g_string_append_len(new_backend->slave_tag, pos_tag+1, pos_weight-pos_tag-1);
+                g_string_append_len(new_backend->politician_tag, pos_tag+1, pos_weight-pos_tag-1);
             } else {
-                g_string_append(new_backend->slave_tag, pos_tag+1);
+                g_string_append(new_backend->politician_tag, pos_tag+1);
             }
         } else {
             pos_weight = strrchr(address, '@');
@@ -597,11 +597,11 @@ int network_backends_add(network_backends_t *bs, /* const */ gchar *address, bac
 
     /* check if this backend is already known */
     g_rw_lock_writer_lock(&bs->backends_lock);  /*remove lock*/
-    gint first_slave = -1;
+    gint first_politician = -1;
     for (i = 0; i < bs->backends->len; i++) {
         network_backend_t *old_backend = bs->backends->pdata[i];
 
-        if (first_slave == -1 && old_backend->type == BACKEND_TYPE_RO) first_slave = i;
+        if (first_politician == -1 && old_backend->type == BACKEND_TYPE_RO) first_politician = i;
 
         if (BACKEND_TYPE_RW == type && old_backend->type == type && BACKEND_STATE_OFFLINE != old_backend->state) {
             g_rw_lock_writer_unlock(&bs->backends_lock);
@@ -618,17 +618,17 @@ int network_backends_add(network_backends_t *bs, /* const */ gchar *address, bac
     }
 
     g_ptr_array_add(bs->backends, new_backend);
-    if (first_slave != -1 && type == BACKEND_TYPE_RW) {
-        network_backend_t *temp_backend = bs->backends->pdata[first_slave];
-        bs->backends->pdata[first_slave] = bs->backends->pdata[bs->backends->len - 1];
+    if (first_politician != -1 && type == BACKEND_TYPE_RW) {
+        network_backend_t *temp_backend = bs->backends->pdata[first_politician];
+        bs->backends->pdata[first_politician] = bs->backends->pdata[bs->backends->len - 1];
         bs->backends->pdata[bs->backends->len - 1] = temp_backend;
     }
 
     if (type == BACKEND_TYPE_RO) {
-        if (new_backend->slave_tag != NULL) {
-            tag_backends_insert(bs, new_backend->slave_tag->str, new_backend);
+        if (new_backend->politician_tag != NULL) {
+            tag_backends_insert(bs, new_backend->politician_tag->str, new_backend);
             g_log_dbproxy(g_message, "add read-only backend %s to backends with tag:%s",
-                                            address, new_backend->slave_tag->str);
+                                            address, new_backend->politician_tag->str);
         } else {
             g_ptr_array_add(bs->def_backend_tag->backends, new_backend);
             g_wrr_poll_update(bs, bs->def_backend_tag);
@@ -699,7 +699,7 @@ ip_match(const void *s1, const void *s2) {
 //user_info_hval_new(hashed_password, hashed_password_real_db, username_real_db, host_real_db);
 
 user_info_hval *
-user_info_hval_new(GString *hashed_passwd, GString *hashed_password_master, gchar* user_master, GString *hashed_password_slave, gchar* user_slave) {
+user_info_hval_new(GString *hashed_passwd, GString *hashed_password_oligarch, gchar* user_oligarch, GString *hashed_password_politician, gchar* user_politician) {
     user_info_hval *hval = g_new0(user_info_hval, 1);
 
     hval->user_hosts = g_ptr_array_new_with_free_func(g_free);
@@ -711,14 +711,14 @@ user_info_hval_new(GString *hashed_passwd, GString *hashed_password_master, gcha
 	/*
 	主库账号和密码
 	*/
-	hval->user_master = g_strdup(user_master);
-	hval->hashed_password_master = hashed_password_master;
+	hval->user_oligarch = g_strdup(user_oligarch);
+	hval->hashed_password_oligarch = hashed_password_oligarch;
 		
 	/*
 	从库账号和密码
 	*/
-	hval->user_slave = g_strdup(user_slave);
-	hval->hashed_password_slave = hashed_password_slave;
+	hval->user_politician = g_strdup(user_politician);
+	hval->hashed_password_politician = hashed_password_politician;
 
     return hval;
 }
@@ -746,7 +746,7 @@ Gint type 1 读取dbproxy 用户 账号和密码
 			 3 读取主库real mysql 用户 账号和密码
 */
 GString *
-get_hash_passwd(GHashTable *pwd_table, gchar *username, GRWLock *user_mgr_lock, gchar** user, gint is_master) {
+get_hash_passwd(GHashTable *pwd_table, gchar *username, GRWLock *user_mgr_lock, gchar** user, gint is_oligarch) {
 
 
     user_info_hval *hval = NULL;
@@ -759,20 +759,20 @@ get_hash_passwd(GHashTable *pwd_table, gchar *username, GRWLock *user_mgr_lock, 
     hval = g_hash_table_lookup(pwd_table, username);
     if (hval != NULL) {
 			
-		if(2 == is_master){
-			g_assert(hval->hashed_password_master->len > 0);
-			res = g_string_sized_new(hval->hashed_password_master->len);
-			g_string_assign_len(res, hval->hashed_password_master->str, hval->hashed_password_master->len);
-			*user = (hval->user_master);
-			g_log_dbproxy(g_message, "hval->user_master is  %s", hval->user_master); 
-		}else if(1 == is_master){
-			g_assert(hval->hashed_password_slave->len > 0);
-			res = g_string_sized_new(hval->hashed_password_slave->len);
+		if(2 == is_oligarch){
+			g_assert(hval->hashed_password_oligarch->len > 0);
+			res = g_string_sized_new(hval->hashed_password_oligarch->len);
+			g_string_assign_len(res, hval->hashed_password_oligarch->str, hval->hashed_password_oligarch->len);
+			*user = (hval->user_oligarch);
+			g_log_dbproxy(g_message, "hval->user_oligarch is  %s", hval->user_oligarch); 
+		}else if(1 == is_oligarch){
+			g_assert(hval->hashed_password_politician->len > 0);
+			res = g_string_sized_new(hval->hashed_password_politician->len);
 			
-			g_string_assign_len(res, hval->hashed_password_slave->str, hval->hashed_password_slave->len);
-			*user= (hval->user_slave);
+			g_string_assign_len(res, hval->hashed_password_politician->str, hval->hashed_password_politician->len);
+			*user= (hval->user_politician);
 			
-			g_log_dbproxy(g_message, "hval->user_slave is %s", hval->user_slave); 
+			g_log_dbproxy(g_message, "hval->user_politician is %s", hval->user_politician); 
 		} else{
 			g_log_dbproxy(g_message, "RRRRRRRRRRRRRRRR"); 
 			g_assert(hval->hashed_password->len > 0);
@@ -800,7 +800,7 @@ get_user_backends(network_backends_t *bs, GHashTable *pwd_table,
     g_assert(username != NULL && pwd_table != NULL);
 
     /*
-     * 1st: slave@, force backend
+     * 1st: politician@, force backend
      * 2nd: user backend
      * 3rd: default backend
      *
@@ -1114,7 +1114,7 @@ funcexit:
 }
 
 gint
-alter_slave_weight(network_backends_t *bs, gint idx, gint weight)
+alter_politician_weight(network_backends_t *bs, gint idx, gint weight)
 {
     network_backend_t       *backend = NULL;
     network_backends_tag    *tag_backends = NULL;
@@ -1135,11 +1135,11 @@ alter_slave_weight(network_backends_t *bs, gint idx, gint weight)
 
     if(BACKEND_TYPE_RO == backend->type) {
         backend->weight = weight;
-        if(NULL == backend->slave_tag) {
+        if(NULL == backend->politician_tag) {
             tag_backends = bs->def_backend_tag;
         } else {
             tag_backends = g_hash_table_lookup(bs->tag_backends,
-                                                  backend->slave_tag->str);
+                                                  backend->politician_tag->str);
             g_assert(tag_backends != NULL);
         }
 
@@ -1155,7 +1155,7 @@ exit:
 }
 
 gint
-add_slave_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
+add_politician_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
 {
     network_backend_t *backend = NULL;
     network_backends_tag *tag_backends = NULL, *tag_backends_local = NULL;
@@ -1192,25 +1192,25 @@ add_slave_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
         backend = network_backends_get(bs,idx);
 
         if(NULL != backend && BACKEND_TYPE_RO == backend->type) {
-            if (NULL != backend->slave_tag &&
-                    0 == strcmp(backend->slave_tag->str, tagname)) {
+            if (NULL != backend->politician_tag &&
+                    0 == strcmp(backend->politician_tag->str, tagname)) {
                 continue;
             }
 
-            if(NULL != backend->slave_tag && 0 < backend->slave_tag->len) {
+            if(NULL != backend->politician_tag && 0 < backend->politician_tag->len) {
                 tag_backends_local = g_hash_table_lookup(bs->tag_backends,
-                                                        backend->slave_tag->str);
+                                                        backend->politician_tag->str);
                 if(NULL != tag_backends_local) {
                     g_ptr_array_remove(tag_backends_local->backends, backend);
                     if (0 == tag_backends_local->backends->len) {
-                        remove_user_tag_backend(bs, backend->slave_tag->str);
-                        g_hash_table_remove(bs->tag_backends,backend->slave_tag->str);
+                        remove_user_tag_backend(bs, backend->politician_tag->str);
+                        g_hash_table_remove(bs->tag_backends,backend->politician_tag->str);
                     }
                 }
             }
 
-            g_string_free(backend->slave_tag,TRUE);
-            backend->slave_tag = g_string_new(tagname);
+            g_string_free(backend->politician_tag,TRUE);
+            backend->politician_tag = g_string_new(tagname);
             g_ptr_array_add(tag_backends->backends, backend);
             g_ptr_array_remove(bs->def_backend_tag->backends, backend);
         }
@@ -1228,7 +1228,7 @@ add_slave_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
 }
 
 gint
-remove_slave_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
+remove_politician_tag(network_backends_t *bs, gchar *tagname, gchar *idxs)
 {
     network_backend_t *backend = NULL;
     network_backends_tag *tag_backends = NULL;
@@ -1443,10 +1443,10 @@ delete_backend_tagname(network_backends_t *bs, network_backends_tag *tag_backend
                                     network_backend_t *backend, GString *tag_string)
 {
     if(NULL != backend && BACKEND_TYPE_RO == backend->type) {
-        if (NULL != backend->slave_tag &&
-                    g_string_equal(backend->slave_tag, tag_string)) {
-            g_string_free(backend->slave_tag, TRUE);
-            backend->slave_tag = NULL;
+        if (NULL != backend->politician_tag &&
+                    g_string_equal(backend->politician_tag, tag_string)) {
+            g_string_free(backend->politician_tag, TRUE);
+            backend->politician_tag = NULL;
             g_ptr_array_remove(tag_backends->backends, backend);
             g_ptr_array_add(bs->def_backend_tag->backends, backend);
         }

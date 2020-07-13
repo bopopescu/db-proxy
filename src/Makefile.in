@@ -139,7 +139,7 @@ am_libmysql_proxy_la_OBJECTS = libmysql_proxy_la-network-mysqld.lo \
 	libmysql_proxy_la-network-mysqld-packet.lo \
 	libmysql_proxy_la-network_mysqld_type.lo \
 	libmysql_proxy_la-network_mysqld_proto_binary.lo \
-	libmysql_proxy_la-network-mysqld-masterinfo.lo \
+	libmysql_proxy_la-network-mysqld-oligarchinfo.lo \
 	libmysql_proxy_la-network-conn-pool.lo \
 	libmysql_proxy_la-network-conn-pool-lua.lo \
 	libmysql_proxy_la-network-queue.lo \
@@ -471,7 +471,7 @@ libmysql_proxy_la_SOURCES = \
 	network-mysqld-packet.c \
 	network_mysqld_type.c \
 	network_mysqld_proto_binary.c \
-	network-mysqld-masterinfo.c \
+	network-mysqld-oligarchinfo.c \
 	network-conn-pool.c  \
 	network-conn-pool-lua.c  \
 	network-queue.c \
@@ -517,7 +517,7 @@ noinst_HEADERS = \
 	network-mysqld-stats.h \
 	network_mysqld_type.h \
 	network_mysqld_proto_binary.h \
-	network-mysqld-masterinfo.h \
+	network-mysqld-oligarchinfo.h \
 	network-conn-pool.h \
 	network-conn-pool-lua.h \
 	network-queue.h \
@@ -810,7 +810,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-injection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-binlog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-lua.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-masterinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-oligarchinfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-packet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld-proto.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmysql_proxy_la-network-mysqld.Plo@am__quote@
@@ -1059,12 +1059,12 @@ libmysql_proxy_la-network_mysqld_proto_binary.lo: network_mysqld_proto_binary.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmysql_proxy_la-network_mysqld_proto_binary.lo `test -f 'network_mysqld_proto_binary.c' || echo '$(srcdir)/'`network_mysqld_proto_binary.c
 
-libmysql_proxy_la-network-mysqld-masterinfo.lo: network-mysqld-masterinfo.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmysql_proxy_la-network-mysqld-masterinfo.lo -MD -MP -MF $(DEPDIR)/libmysql_proxy_la-network-mysqld-masterinfo.Tpo -c -o libmysql_proxy_la-network-mysqld-masterinfo.lo `test -f 'network-mysqld-masterinfo.c' || echo '$(srcdir)/'`network-mysqld-masterinfo.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmysql_proxy_la-network-mysqld-masterinfo.Tpo $(DEPDIR)/libmysql_proxy_la-network-mysqld-masterinfo.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='network-mysqld-masterinfo.c' object='libmysql_proxy_la-network-mysqld-masterinfo.lo' libtool=yes @AMDEPBACKSLASH@
+libmysql_proxy_la-network-mysqld-oligarchinfo.lo: network-mysqld-oligarchinfo.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmysql_proxy_la-network-mysqld-oligarchinfo.lo -MD -MP -MF $(DEPDIR)/libmysql_proxy_la-network-mysqld-oligarchinfo.Tpo -c -o libmysql_proxy_la-network-mysqld-oligarchinfo.lo `test -f 'network-mysqld-oligarchinfo.c' || echo '$(srcdir)/'`network-mysqld-oligarchinfo.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmysql_proxy_la-network-mysqld-oligarchinfo.Tpo $(DEPDIR)/libmysql_proxy_la-network-mysqld-oligarchinfo.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='network-mysqld-oligarchinfo.c' object='libmysql_proxy_la-network-mysqld-oligarchinfo.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmysql_proxy_la-network-mysqld-masterinfo.lo `test -f 'network-mysqld-masterinfo.c' || echo '$(srcdir)/'`network-mysqld-masterinfo.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libmysql_proxy_la-network-mysqld-oligarchinfo.lo `test -f 'network-mysqld-oligarchinfo.c' || echo '$(srcdir)/'`network-mysqld-oligarchinfo.c
 
 libmysql_proxy_la-network-conn-pool.lo: network-conn-pool.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmysql_proxy_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libmysql_proxy_la-network-conn-pool.lo -MD -MP -MF $(DEPDIR)/libmysql_proxy_la-network-conn-pool.Tpo -c -o libmysql_proxy_la-network-conn-pool.lo `test -f 'network-conn-pool.c' || echo '$(srcdir)/'`network-conn-pool.c

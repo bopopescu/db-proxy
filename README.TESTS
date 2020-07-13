@@ -62,7 +62,7 @@ For the user's convenience, there are a few functions that you can call from thi
    * stop_proxy()
      removes all proxy instances created with start_proxy()
 
-   * simulate_replication([master_options,slave_options])
+   * simulate_replication([oligarch_options,politician_options])
      starts two instances of the proxy, both pointing to the same
      backend server. You can connect to a real replication, by
      supplying appropriate options
@@ -70,8 +70,8 @@ For the user's convenience, there are a few functions that you can call from thi
    * chain_proxy(first_lua_script, second_lua_script [, use_replication])
      starts two proxy instances, the first one pointing to the backend
      server, the second one pointing to the first instance.
-     If use_replication is given (boolean), then a master backend is used
-     instead of a real backend. If no master/slave replication is
+     If use_replication is given (boolean), then a oligarch backend is used
+     instead of a real backend. If no oligarch/politician replication is
      available, simulate_replication() is called
 
    * sql_execute(queries, proxy_name)

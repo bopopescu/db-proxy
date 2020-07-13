@@ -26,28 +26,28 @@
 #include "network-mysqld-proto.h"
 
 typedef struct {
-    guint32   master_lines;
-    GString  *master_log_file;
-    guint32   master_log_pos;
-    GString  *master_host;
-    GString  *master_user;
-    GString  *master_password;
-    guint32   master_port;
-    guint32   master_connect_retry;
+    guint32   oligarch_lines;
+    GString  *oligarch_log_file;
+    guint32   oligarch_log_pos;
+    GString  *oligarch_host;
+    GString  *oligarch_user;
+    GString  *oligarch_password;
+    guint32   oligarch_port;
+    guint32   oligarch_connect_retry;
 
-    guint32   master_ssl;          /* if ssl is compiled in */
-    GString  *master_ssl_ca;
-    GString  *master_ssl_capath;
-    GString  *master_ssl_cert;
-    GString  *master_ssl_cipher;
-    GString  *master_ssl_key;
+    guint32   oligarch_ssl;          /* if ssl is compiled in */
+    GString  *oligarch_ssl_ca;
+    GString  *oligarch_ssl_capath;
+    GString  *oligarch_ssl_cert;
+    GString  *oligarch_ssl_cipher;
+    GString  *oligarch_ssl_key;
 
-    guint32   master_ssl_verify_server_cert; /* 5.1.16+ */
-} network_mysqld_masterinfo_t;
+    guint32   oligarch_ssl_verify_server_cert; /* 5.1.16+ */
+} network_mysqld_oligarchinfo_t;
 
-NETWORK_API network_mysqld_masterinfo_t * network_mysqld_masterinfo_new(void);
-NETWORK_API int network_mysqld_masterinfo_get(network_packet *packet, network_mysqld_masterinfo_t *info);
-NETWORK_API int network_mysqld_masterinfo_append(GString *packet, network_mysqld_masterinfo_t *info);
-NETWORK_API void network_mysqld_masterinfo_free(network_mysqld_masterinfo_t *info);
+NETWORK_API network_mysqld_oligarchinfo_t * network_mysqld_oligarchinfo_new(void);
+NETWORK_API int network_mysqld_oligarchinfo_get(network_packet *packet, network_mysqld_oligarchinfo_t *info);
+NETWORK_API int network_mysqld_oligarchinfo_append(GString *packet, network_mysqld_oligarchinfo_t *info);
+NETWORK_API void network_mysqld_oligarchinfo_free(network_mysqld_oligarchinfo_t *info);
 
 #endif

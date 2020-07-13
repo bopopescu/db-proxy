@@ -20,43 +20,43 @@
 #include <stdlib.h>
 
 #include "glib-ext.h"
-#include "network-mysqld-masterinfo.h"
+#include "network-mysqld-oligarchinfo.h"
 
 #define C(x) x, sizeof(x) - 1
 #define S(x) x->str, x->len
 
-network_mysqld_masterinfo_t * network_mysqld_masterinfo_new(void) {
-    network_mysqld_masterinfo_t *info;
+network_mysqld_oligarchinfo_t * network_mysqld_oligarchinfo_new(void) {
+    network_mysqld_oligarchinfo_t *info;
 
-    info = g_new0(network_mysqld_masterinfo_t, 1);
+    info = g_new0(network_mysqld_oligarchinfo_t, 1);
 
-    info->master_log_file   = g_string_new(NULL);
-    info->master_host       = g_string_new(NULL);
-    info->master_user       = g_string_new(NULL);
-    info->master_password   = g_string_new(NULL);
+    info->oligarch_log_file   = g_string_new(NULL);
+    info->oligarch_host       = g_string_new(NULL);
+    info->oligarch_user       = g_string_new(NULL);
+    info->oligarch_password   = g_string_new(NULL);
     
-    info->master_ssl_ca     = g_string_new(NULL);
-    info->master_ssl_capath = g_string_new(NULL);
-    info->master_ssl_cert   = g_string_new(NULL);
-    info->master_ssl_cipher = g_string_new(NULL);
-    info->master_ssl_key    = g_string_new(NULL);
+    info->oligarch_ssl_ca     = g_string_new(NULL);
+    info->oligarch_ssl_capath = g_string_new(NULL);
+    info->oligarch_ssl_cert   = g_string_new(NULL);
+    info->oligarch_ssl_cipher = g_string_new(NULL);
+    info->oligarch_ssl_key    = g_string_new(NULL);
 
     return info;
 }
 
-void network_mysqld_masterinfo_free(network_mysqld_masterinfo_t *info) {
+void network_mysqld_oligarchinfo_free(network_mysqld_oligarchinfo_t *info) {
     if (!info) return;
 
-    g_string_free(info->master_log_file, TRUE);
-    g_string_free(info->master_host, TRUE);
-    g_string_free(info->master_user, TRUE);
-    g_string_free(info->master_password, TRUE);
+    g_string_free(info->oligarch_log_file, TRUE);
+    g_string_free(info->oligarch_host, TRUE);
+    g_string_free(info->oligarch_user, TRUE);
+    g_string_free(info->oligarch_password, TRUE);
     
-    g_string_free(info->master_ssl_ca, TRUE);
-    g_string_free(info->master_ssl_capath, TRUE);
-    g_string_free(info->master_ssl_cert, TRUE);
-    g_string_free(info->master_ssl_cipher, TRUE);
-    g_string_free(info->master_ssl_key, TRUE);
+    g_string_free(info->oligarch_ssl_ca, TRUE);
+    g_string_free(info->oligarch_ssl_capath, TRUE);
+    g_string_free(info->oligarch_ssl_cert, TRUE);
+    g_string_free(info->oligarch_ssl_cipher, TRUE);
+    g_string_free(info->oligarch_ssl_key, TRUE);
 
     g_free(info);
 }
@@ -65,7 +65,7 @@ void network_mysqld_masterinfo_free(network_mysqld_masterinfo_t *info) {
  * get \n terminated strings 
  */
 
-static int network_mysqld_masterinfo_get_string(network_packet *packet, GString *str) {
+static int network_mysqld_oligarchinfo_get_string(network_packet *packet, GString *str) {
     guint i;
 
     g_return_val_if_fail(packet, -1);
@@ -88,12 +88,12 @@ static int network_mysqld_masterinfo_get_string(network_packet *packet, GString 
     return -1;
 }
 
-static int network_mysqld_masterinfo_get_int32(network_packet *packet, guint32 *_i) {
+static int network_mysqld_oligarchinfo_get_int32(network_packet *packet, guint32 *_i) {
     GString *s;
     int err = 0;
 
     s = g_string_new(NULL);
-    err = err || network_mysqld_masterinfo_get_string(packet, s);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, s);
     if (!err) {
         char *errptr;
         guint32 i;
@@ -111,72 +111,72 @@ static int network_mysqld_masterinfo_get_int32(network_packet *packet, guint32 *
 }
 
 /**
- * get the master-info structure from the internal representation 
+ * get the oligarch-info structure from the internal representation 
  */
-int network_mysqld_masterinfo_get(network_packet *packet, network_mysqld_masterinfo_t *info) {
+int network_mysqld_oligarchinfo_get(network_packet *packet, network_mysqld_oligarchinfo_t *info) {
     int err = 0;
 
     g_return_val_if_fail(info, -1);
     g_return_val_if_fail(packet, -1);
 
-    /*err = err || network_mysqld_masterinfo_get_int32(packet, &lines);*/
-    /*info->master_lines = lines;*/
-        err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_lines));
-        err = err || network_mysqld_masterinfo_get_string(packet, info->master_log_file);
-    err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_log_pos));
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_host);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_user);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_password);
-    err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_port));
-    err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_connect_retry));
-    err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_ssl));
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_ssl_ca);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_ssl_capath);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_ssl_cert);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_ssl_cipher);
-    err = err || network_mysqld_masterinfo_get_string(packet, info->master_ssl_key);
-    if (info->master_lines >= 15) {
-        err = err || network_mysqld_masterinfo_get_int32(packet, &(info->master_ssl_verify_server_cert));
+    /*err = err || network_mysqld_oligarchinfo_get_int32(packet, &lines);*/
+    /*info->oligarch_lines = lines;*/
+        err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_lines));
+        err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_log_file);
+    err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_log_pos));
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_host);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_user);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_password);
+    err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_port));
+    err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_connect_retry));
+    err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_ssl));
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_ssl_ca);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_ssl_capath);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_ssl_cert);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_ssl_cipher);
+    err = err || network_mysqld_oligarchinfo_get_string(packet, info->oligarch_ssl_key);
+    if (info->oligarch_lines >= 15) {
+        err = err || network_mysqld_oligarchinfo_get_int32(packet, &(info->oligarch_ssl_verify_server_cert));
     }
     return err ? -1 : 0;
 }
 
-static int network_mysqld_masterinfo_append_string(GString *packet, GString *s) {
+static int network_mysqld_oligarchinfo_append_string(GString *packet, GString *s) {
     g_string_append_len(packet, S(s));
     g_string_append_c(packet, '\n');
 
     return 0;
 }
 
-static int network_mysqld_masterinfo_append_int32(GString *packet, guint32 i) {
+static int network_mysqld_oligarchinfo_append_int32(GString *packet, guint32 i) {
     g_string_append_printf(packet, "%"G_GUINT32_FORMAT"\n", i);
 
     return 0;
 }
 
 
-int network_mysqld_masterinfo_append(GString *packet, network_mysqld_masterinfo_t *info) {
+int network_mysqld_oligarchinfo_append(GString *packet, network_mysqld_oligarchinfo_t *info) {
     int err = 0;
 
     g_return_val_if_fail(info, -1);
     g_return_val_if_fail(packet, -1);
 
-    err = err || network_mysqld_masterinfo_append_int32(packet, info->master_lines);
-        err = err || network_mysqld_masterinfo_append_string(packet, info->master_log_file);
-    err = err || network_mysqld_masterinfo_append_int32(packet, info->master_log_pos);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_host);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_user);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_password);
-    err = err || network_mysqld_masterinfo_append_int32(packet, info->master_port);
-    err = err || network_mysqld_masterinfo_append_int32(packet, info->master_connect_retry);
-    err = err || network_mysqld_masterinfo_append_int32(packet, info->master_ssl);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_ssl_ca);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_ssl_capath);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_ssl_cert);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_ssl_cipher);
-    err = err || network_mysqld_masterinfo_append_string(packet, info->master_ssl_key);
-    if (info->master_lines >= 15) {
-                err = err || network_mysqld_masterinfo_append_int32(packet, info->master_ssl_verify_server_cert);
+    err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_lines);
+        err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_log_file);
+    err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_log_pos);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_host);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_user);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_password);
+    err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_port);
+    err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_connect_retry);
+    err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_ssl);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_ssl_ca);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_ssl_capath);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_ssl_cert);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_ssl_cipher);
+    err = err || network_mysqld_oligarchinfo_append_string(packet, info->oligarch_ssl_key);
+    if (info->oligarch_lines >= 15) {
+                err = err || network_mysqld_oligarchinfo_append_int32(packet, info->oligarch_ssl_verify_server_cert);
         }
 
     return err ? -1 : 0;

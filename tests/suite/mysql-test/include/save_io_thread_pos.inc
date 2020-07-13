@@ -1,17 +1,17 @@
 # ==== Purpose ====
 #
 # Save the current position of the IO thread, just like
-# save_master_pos.inc does for the master's position.
+# save_oligarch_pos.inc does for the oligarch's position.
 #
 #
 # ==== Usage ====
 #
 # [--let $use_gtids= 1]
 # [--let $rpl_debug= 1]
-# --source include/save_master_pos.inc
+# --source include/save_oligarch_pos.inc
 #
 # Typically, you would use this script together with
-# include/sync_io_with_master.inc
+# include/sync_io_with_oligarch.inc
 #
 # Parameters:
 #

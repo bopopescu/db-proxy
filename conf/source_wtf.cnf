@@ -20,10 +20,10 @@ proxy-read-only-backend-addresses=10.99.1.148:3306@4,10.99.1.135:3306@6
 #dbproxy账号密码与real 主mysql 和 从mysql 隔离
 dbproxy-user=test
 dbproxy-pwd=7O7YJJEK
-master-user = root
-master-pwd = 7O3aIZUN
-slave-user = root
-slave-pwd = 7O7YJJEK
+oligarch-user = root
+oligarch-pwd = 7O3aIZUN
+politician-user = root
+politician-pwd = 7O7YJJEK
 
 #pwds=test:7O7YJJEK:root:7O3aIZUN:root:7O7YJJEK
 

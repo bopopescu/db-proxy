@@ -656,7 +656,7 @@ int network_mysqld_binlog_event_print(network_mysqld_binlog *binlog,
     case FORMAT_DESCRIPTION_EVENT: /* 15 */
         g_print("-- format-description:\n");
         g_print("--   file-version: %d\n", event->event.format_event.binlog_version);
-        g_print("--   writer-version: %s\n", event->event.format_event.master_version);
+        g_print("--   writer-version: %s\n", event->event.format_event.oligarch_version);
         g_print("--   created: %d\n", event->event.format_event.created_ts);
         g_print("--   no. of known events: %"G_GSIZE_FORMAT"\n", event->event.format_event.perm_events_len);
         break;

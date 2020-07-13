@@ -144,8 +144,8 @@ function read_query(packet)
             { name = "status", 
               type = proxy.MYSQL_TYPE_STRING },
         }
-    elseif string.find(query:lower(), "^add%s+master%s+%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?:%d%d?%d?%d?%d?$") then
-        local newserver = string.match(query:lower(), "^add%s+master%s+(.+)$")
+    elseif string.find(query:lower(), "^add%s+oligarch%s+%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?:%d%d?%d?%d?%d?$") then
+        local newserver = string.match(query:lower(), "^add%s+oligarch%s+(.+)$")
         local ret = proxy.global.backends(newserver, proxy.ADD_MASTER)
         if proxy.global.config.rwsplit then proxy.global.config.rwsplit.max_weight = -1 end
 
@@ -167,8 +167,8 @@ function read_query(packet)
               type = proxy.MYSQL_TYPE_STRING },
         }
 
-    elseif string.find(query:lower(), "^add%s+slave%s+%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?:%d%d?%d?%d?%d?.*$") then
-        local newserver = string.match(query:lower(), "^add%s+slave%s+(.+)$")
+    elseif string.find(query:lower(), "^add%s+politician%s+%d%d?%d?%.%d%d?%d?%.%d%d?%d?%.%d%d?%d?:%d%d?%d?%d?%d?.*$") then
+        local newserver = string.match(query:lower(), "^add%s+politician%s+(.+)$")
         local ret = proxy.global.backends(newserver, proxy.ADD_SLAVE)
         if proxy.global.config.rwsplit then proxy.global.config.rwsplit.max_weight = -1 end
 
@@ -274,26 +274,26 @@ function read_query(packet)
                 type = proxy.MYSQL_TYPE_STRING 
             },
             { 
-                name = "master-user",
+                name = "oligarch-user",
                 type = proxy.MYSQL_TYPE_STRING 
             },
             { 
-                name = "master-pwd",
+                name = "oligarch-pwd",
                 type = proxy.MYSQL_TYPE_STRING 
             },
             { 
-                name = "slave-user",
+                name = "politician-user",
                 type = proxy.MYSQL_TYPE_STRING 
             },
             { 
-                name = "slave-pwd",
+                name = "politician-pwd",
                 type = proxy.MYSQL_TYPE_STRING 
             }
         }
         
         if nil ~= users_info then
                     for k, v in pairs(users_info) do
-                         rows[#rows + 1] = {v["username"], v["password"], v["hosts"], v["backends"], v["type"], v["master-user"], v["master-pwd"], v["slave-user"], v["slave-pwd"]}
+                         rows[#rows + 1] = {v["username"], v["password"], v["hosts"], v["backends"], v["type"], v["oligarch-user"], v["oligarch-pwd"], v["politician-user"], v["politician-pwd"]}
                     end
         end
     elseif string.find(query:lower(), "^%s*show%s+tables%s*") then
@@ -885,32 +885,32 @@ function read_query(packet)
                 { name = "status",
                 type = proxy.MYSQL_TYPE_STRING },
         }
-     elseif string.find(query:lower(),"^%s*add%s+slave%s+tag%s+%S+%s+%S+%s*$") then 
+     elseif string.find(query:lower(),"^%s*add%s+politician%s+tag%s+%S+%s+%S+%s*$") then 
         local tagname, backendindxs = string.match(query, "^%s*[aA][dD][dD]%s+[sS][lL][aA][vV][eE]%s+[tT][aA][gG]%s+(%S+)%s+(%S+)%s*$")
-        proxy.global.backends.addslavetag = tagname..":"..backendindxs;
+        proxy.global.backends.addpoliticiantag = tagname..":"..backendindxs;
         fields = {
             { name = "status",
             type = proxy.MYSQL_TYPE_STRING },
         }
-     elseif string.find(query:lower(), "^%s*remove%s+slave%s+tag%s+%S+.*$")  then
+     elseif string.find(query:lower(), "^%s*remove%s+politician%s+tag%s+%S+.*$")  then
         local tagname, backendindxs
-        if string.find(query:lower(), "^%s*remove%s+slave%s+tag%s+%S+%s+%S+%s*$") then
+        if string.find(query:lower(), "^%s*remove%s+politician%s+tag%s+%S+%s+%S+%s*$") then
             tagname, backendindxs  = string.match(query, "^%s*[rR][eE][mM][oO][vV][eE]%s+[sS][lL][aA][vV][eE]%s+[tT][aA][gG]%s+(%S+)%s+(%S+)%s*$")
-        elseif string.find(query:lower(), "^%s*remove%s+slave%s+tag%s+%S+%s*$") then
+        elseif string.find(query:lower(), "^%s*remove%s+politician%s+tag%s+%S+%s*$") then
             tagname = string.match(query, "^%s*[rR][eE][mM][oO][vV][eE]%s+[sS][lL][aA][vV][eE]%s+[tT][aA][gG]%s+(%S+)%s*$")
             backendindxs = ""
         else
             tagname = ""
             backendIndxs = ""
         end
-        proxy.global.backends.removeslavetag = tagname..":"..backendindxs;
+        proxy.global.backends.removepoliticiantag = tagname..":"..backendindxs;
 
         fields = {
             { name = "status",
             type = proxy.MYSQL_TYPE_STRING },
         }
-     elseif string.find(query:lower(), "^%s*alter%s+slave%s+weight%s+%d+%s+%d+%s*$") then
-        local backendIndx, weight = string.match(query:lower(), "^%s*alter%s+slave%s+weight%s+(%d+)%s+(%d+)%s*$")   
+     elseif string.find(query:lower(), "^%s*alter%s+politician%s+weight%s+%d+%s+%d+%s*$") then
+        local backendIndx, weight = string.match(query:lower(), "^%s*alter%s+politician%s+weight%s+(%d+)%s+(%d+)%s*$")   
         proxy.global.backends.alterweight = tostring(backendIndx-1)..":"..tostring(weight);
         fields = {
             { name = "status",
@@ -965,8 +965,8 @@ function read_query(packet)
     rows[#rows + 1] = { "SELECT * FROM backends", "lists the backends and their state" }
     rows[#rows + 1] = { "SET OFFLINE $backend_id [timeout $int]", "offline backend server, $backend_id is backend_ndx's id, timeout in seconds" }
     rows[#rows + 1] = { "SET ONLINE $backend_id", "online backend server, ..." }
-    rows[#rows + 1] = { "ADD MASTER $backend", "example: \"add master 127.0.0.1:3306\", ..." }
-    rows[#rows + 1] = { "ADD SLAVE $backend", "example: \"add slave 127.0.0.1:3306$slave_tag\", ..." }
+    rows[#rows + 1] = { "ADD MASTER $backend", "example: \"add oligarch 127.0.0.1:3306\", ..." }
+    rows[#rows + 1] = { "ADD SLAVE $backend", "example: \"add politician 127.0.0.1:3306$politician_tag\", ..." }
     rows[#rows + 1] = { "REMOVE BACKEND $backend_id [timeout $int]", "example: \"remove backend 1\",  timeout in seconds ..." }
     rows[#rows + 1] = { "SET remove-backend-timeout = $int", "online set the global timeout of remove/offline backend in seconds." }
 
@@ -980,11 +980,11 @@ function read_query(packet)
     rows[#rows + 1] = { "REMOVE PWD $pwd", "example: \"remove pwd user\", ..." }
     rows[#rows + 1] = { "ADD USER HOSTS $user_ips", "example: \"add user hosts usr@ip1|ip2\",  ..." }
     rows[#rows + 1] = { "REMOVE USER HOSTS $user_ips", "example: \"remove user hosts usr[@ip1|ip2]\",  ..." }
-    rows[#rows + 1] = { "ADD USER BACKENDS $user_backends", "example: \"add user backends usr@lave_tag1[|slave_tag2]\",  ..." }
-    rows[#rows + 1] = { "REMOVE USER BACKENDS $user_backends", "example: \"remove user backends usr[@lave_tag1[|slave_tag2]]\",  ..." }
-    rows[#rows + 1] = { "ADD SLAVE TAG $tag_name $backend_idx", "example: \"add slave tag tag_name backend_idx[,backend_idx]\",  ..." }
-    rows[#rows + 1] = { "REMOVE SLAVE TAG $tag_name $backend_idx", "example: \"add slave tag tag_name backend_idx[,backend_idx]\",  ..." }
-    rows[#rows + 1] = { "ALTER SLAVE WEIGHT $backendIndx $weight", "example: \"alter slave weight backendIndx weight\",  ..." }
+    rows[#rows + 1] = { "ADD USER BACKENDS $user_backends", "example: \"add user backends usr@lave_tag1[|politician_tag2]\",  ..." }
+    rows[#rows + 1] = { "REMOVE USER BACKENDS $user_backends", "example: \"remove user backends usr[@lave_tag1[|politician_tag2]]\",  ..." }
+    rows[#rows + 1] = { "ADD SLAVE TAG $tag_name $backend_idx", "example: \"add politician tag tag_name backend_idx[,backend_idx]\",  ..." }
+    rows[#rows + 1] = { "REMOVE SLAVE TAG $tag_name $backend_idx", "example: \"add politician tag tag_name backend_idx[,backend_idx]\",  ..." }
+    rows[#rows + 1] = { "ALTER SLAVE WEIGHT $backendIndx $weight", "example: \"alter politician weight backendIndx weight\",  ..." }
     rows[#rows + 1] = { "ADD ADMIN USER HOSTS $ips", "example: \"add admin user host ip1[,ip2,...]\",  ..." }
     rows[#rows + 1] = { "REMOVE ADMIN USER HOSTS $ips", "example: \"remove admin user host ip1[,ip2...]\",  ..." }
     rows[#rows + 1] = { "ALTER ADMIN USER $pwd", "example: \"alter admin user user:raw_password\",  ..." }

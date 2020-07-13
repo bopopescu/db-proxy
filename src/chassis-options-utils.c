@@ -1044,8 +1044,8 @@ int save_config(chassis *chas) {
         return 1;
     }
 
-    GString *master = g_string_new(NULL);
-    GString *slave  = g_string_new(NULL);
+    GString *oligarch = g_string_new(NULL);
+    GString *politician  = g_string_new(NULL);
     guint i;
     GPtrArray *backends = bs->backends;
 
@@ -1060,29 +1060,29 @@ int save_config(chassis *chas) {
             continue;
         }
         if (backend->type == BACKEND_TYPE_RW) {
-            g_string_append_printf(master, ",%s", backend->addr->name->str);
+            g_string_append_printf(oligarch, ",%s", backend->addr->name->str);
         } else if (backend->type == BACKEND_TYPE_RO) {
-            g_string_append_printf(slave, ",%s", backend->addr->name->str);
+            g_string_append_printf(politician, ",%s", backend->addr->name->str);
 
-            if (backend->slave_tag && backend->slave_tag->len > 0) g_string_append_printf(slave, "$%s", backend->slave_tag->str);
-            if (backend->weight != 1) g_string_append_printf(slave, "@%d", backend->weight);
+            if (backend->politician_tag && backend->politician_tag->len > 0) g_string_append_printf(politician, "$%s", backend->politician_tag->str);
+            if (backend->weight != 1) g_string_append_printf(politician, "@%d", backend->weight);
         }
     }
     g_rw_lock_reader_unlock(&bs->backends_lock);
 
-    if (master->len != 0) {
-        g_key_file_set_value(keyfile, "mysql-proxy", "proxy-backend-addresses", master->str+1);
+    if (oligarch->len != 0) {
+        g_key_file_set_value(keyfile, "mysql-proxy", "proxy-backend-addresses", oligarch->str+1);
     } else {
         g_key_file_set_value(keyfile, "mysql-proxy", "proxy-backend-addresses", "");
     }
-    if (slave->len != 0) {
-        g_key_file_set_value(keyfile, "mysql-proxy", "proxy-read-only-backend-addresses", slave->str+1);
+    if (politician->len != 0) {
+        g_key_file_set_value(keyfile, "mysql-proxy", "proxy-read-only-backend-addresses", politician->str+1);
     } else {
         g_key_file_set_value(keyfile, "mysql-proxy", "proxy-read-only-backend-addresses", "");
     }
 
-    g_string_free(master, TRUE);
-    g_string_free(slave, TRUE);
+    g_string_free(oligarch, TRUE);
+    g_string_free(politician, TRUE);
 
     /* user */
     GString *pwds = g_string_new(NULL);

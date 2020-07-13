@@ -955,7 +955,7 @@ int strpos( char* str, char c ) {
 /*
 作用: 普通字符串替换
 参数: rep 被替换的字符串 with 要替换的字符串
-参考: https://github.com/hazbo/str_replace/blob/master/C/1/main.c
+参考: https://github.com/hazbo/str_replace/blob/oligarch/C/1/main.c
 注意: 一定释放内存
 */
 char* str_replace(char* orig, char* rep, char* with)
@@ -1856,7 +1856,7 @@ network_backend_t* wrr_ro(network_mysqld_con *con, gint *backend_ndx, gchar *bac
         backends = tag_backends->backends;
 
         if (TRACE_SQL(con->srv->log->log_trace_modules)) {
-            gchar *msg = g_strdup_printf("query requires sending to slave "
+            gchar *msg = g_strdup_printf("query requires sending to politician "
                                     "with tag:%s for user:%s", backend_tag ? backend_tag : "default", user);
             CON_MSG_HANDLE(g_message, con, msg);
             g_free(msg);
@@ -1866,7 +1866,7 @@ network_backend_t* wrr_ro(network_mysqld_con *con, gint *backend_ndx, gchar *bac
     guint cur_weight = rwsplit->cur_weight;
     guint next_ndx   = rwsplit->next_ndx;
 
-    // get backend index by slave wrr
+    // get backend index by politician wrr
     network_backend_t *res = NULL, *temp_res = NULL;
     for(i = 0; i < ndx_num; ++i) {
         network_backend_t *backend = (network_backend_t *)g_ptr_array_index(backends, next_ndx);
@@ -3084,7 +3084,7 @@ gboolean sql_is_write(GPtrArray *tokens) {
 }
 
 static void sql_rw_split(GPtrArray* tokens, network_mysqld_con* con, char type, gboolean is_write) {
-    gboolean b_master = FALSE;
+    gboolean b_oligarch = FALSE;
     network_mysqld_con_lua_t *st = con->plugin_con_state;
     network_backend_t *backend = NULL;
     gchar *backend_tag = NULL;
@@ -3093,53 +3093,53 @@ static void sql_rw_split(GPtrArray* tokens, network_mysqld_con* con, char type, 
     if (con->client->conn_attr.autocommit_status == AUTOCOMMIT_FALSE
         || con->conn_status.is_set_autocommit
         || con->conn_status.lock_stmt_type != LOCK_TYPE_NONE) {
-        b_master = TRUE;
+        b_oligarch = TRUE;
         if (TRACE_SQL(con->srv->log->log_trace_modules)) {
             CON_MSG_HANDLE(g_message, con, "autocommit/lock stmt and in transaction "
-                                                    "requires sending to master");
+                                                    "requires sending to oligarch");
         }
     } else if (type == COM_QUERY) {
         if (is_write) {
-            b_master = TRUE;
+            b_oligarch = TRUE;
             if (TRACE_SQL(con->srv->log->log_trace_modules)) {
-                CON_MSG_HANDLE(g_message, con, "write query requires sending to master");
+                CON_MSG_HANDLE(g_message, con, "write query requires sending to oligarch");
             }
         } else {
             sql_token* first_token = tokens->pdata[1];
             if (first_token->token_id == TK_COMMENT && strcasecmp(first_token->text->str, "MASTER") == 0) {
-                b_master = TRUE;
+                b_oligarch = TRUE;
                 if (TRACE_SQL(con->srv->log->log_trace_modules)) {
-                    CON_MSG_HANDLE(g_message, con, "query starting with /*master*/ "
-                                                        "requires sending to master");
+                    CON_MSG_HANDLE(g_message, con, "query starting with /*oligarch*/ "
+                                                        "requires sending to oligarch");
                 }
             } else if (first_token->token_id == TK_COMMENT &&
-                            strncasecmp(first_token->text->str, "slave@",
-                                            strlen("slave@") - 1) == 0) {
-                b_master = FALSE;
-                backend_tag = g_strdup(first_token->text->str + strlen("slave@"));
+                            strncasecmp(first_token->text->str, "politician@",
+                                            strlen("politician@") - 1) == 0) {
+                b_oligarch = FALSE;
+                backend_tag = g_strdup(first_token->text->str + strlen("politician@"));
                 if (TRACE_SQL(con->srv->log->log_trace_modules)) {
                     gchar *msg = g_strdup_printf("query starting with %s requires "
-                                "sending to slave with tag:%s", first_token->text->str, backend_tag);
+                                "sending to politician with tag:%s", first_token->text->str, backend_tag);
                     CON_MSG_HANDLE(g_message, con, msg);
                     g_free(msg);
                 }
             } else {
-                b_master = FALSE;
+                b_oligarch = FALSE;
             }
         }
     } else if (type == COM_INIT_DB || type == COM_SET_OPTION || type == COM_FIELD_LIST) {
-        b_master = FALSE;
+        b_oligarch = FALSE;
     } else {
         if (TRACE_SQL(con->srv->log->log_trace_modules)) {
-                    gchar *msg = g_strdup_printf("%s requires sending to master", GET_COM_NAME(type));
+                    gchar *msg = g_strdup_printf("%s requires sending to oligarch", GET_COM_NAME(type));
                     CON_MSG_HANDLE(g_message, con, msg);
                     g_free(msg);
                 }
-        b_master = TRUE;
+        b_oligarch = TRUE;
     }
 
     // 如果当前需要发往主库，则检查当前的db连接是否为主库连接，如果不是则不能使用当前db连接
-    if (b_master && con->server != NULL)
+    if (b_oligarch && con->server != NULL)
     {
         backend_ndx = -1;
         g_rw_lock_reader_lock(&con->srv->backends->backends_lock);
@@ -3150,8 +3150,8 @@ static void sql_rw_split(GPtrArray* tokens, network_mysqld_con* con, char type, 
         {
             network_backend_t *old_backend = st->backend;
             if (TRACE_SQL(con->srv->log->log_trace_modules)) {
-                gchar *msg = g_strdup_printf("current backend(%d) isn't the master node(%d), "
-                                            "DBProxy will close the connnection to this backend, then try to get a new master backend.",
+                gchar *msg = g_strdup_printf("current backend(%d) isn't the oligarch node(%d), "
+                                            "DBProxy will close the connnection to this backend, then try to get a new oligarch backend.",
                                              st->backend_ndx, backend_ndx);
                 CON_MSG_HANDLE(g_message, con, msg);
                 g_free(msg);
@@ -3171,13 +3171,13 @@ static void sql_rw_split(GPtrArray* tokens, network_mysqld_con* con, char type, 
                      || con->client && con->client->conn_attr.savepoint_flag)) {
                 //if old backend is RW, the err-message is still 'I have no server backend', fix it later.
                 if (backend_tag != NULL) { g_free(backend_tag); }
-                g_log_dbproxy(g_warning, "candidate master-backend is not the original, close both connections");
+                g_log_dbproxy(g_warning, "candidate oligarch-backend is not the original, close both connections");
                 return;
             }
         }
     }
 
-    if (!b_master && con->server == NULL)
+    if (!b_oligarch && con->server == NULL)
     {
         backend_ndx = -1;
         g_rw_lock_reader_lock(&con->srv->backends->backends_lock);
@@ -3228,19 +3228,19 @@ static void sql_rw_split(GPtrArray* tokens, network_mysqld_con* con, char type, 
 		NETWORK_MYSQLD_PLUGIN_PROTO(proxy_read_auth) {
 		get_hash_passwd(bs->pwd_table, auth->username->str, &bs->user_mgr_lock, NULL, 0);
 
-		最后一个参数 是 is_master 为0
+		最后一个参数 是 is_oligarch 为0
 		*/
 
 		
-		gint is_master = 1;
-		if(b_master) {
-			is_master = 2;
+		gint is_oligarch = 1;
+		if(b_oligarch) {
+			is_oligarch = 2;
 		}
 		
-		g_log_dbproxy(g_message, "sql_rw_split is_master is %d", is_master);
+		g_log_dbproxy(g_message, "sql_rw_split is_oligarch is %d", is_oligarch);
 
         con->server = network_connection_pool_lua_swap(con, backend, backend_ndx,
-                                                        con->srv->backends->pwd_table, is_master);
+                                                        con->srv->backends->pwd_table, is_oligarch);
         if (backend != NULL && con->server == NULL) {
             g_atomic_int_dec_and_test(&backend->connected_clients);
         }
@@ -4470,10 +4470,10 @@ chassis_plugin_config * network_mysqld_proxy_plugin_new(void) {
 	config->id_generate    = NULL;
 	config->dbproxy_user = NULL;
 	config->dbproxy_pwd = NULL;
-	config->master_user  = NULL;
-	config->master_pwd  = NULL;
-	config->slave_user    = NULL;
-	config->slave_pwd    = NULL;
+	config->oligarch_user  = NULL;
+	config->oligarch_pwd  = NULL;
+	config->politician_user    = NULL;
+	config->politician_pwd    = NULL;
 }
 
 void network_mysqld_proxy_plugin_free(chassis_plugin_config *oldconfig) {
@@ -4569,10 +4569,10 @@ void network_mysqld_proxy_plugin_free(chassis_plugin_config *oldconfig) {
 	if (config->id_generate) g_free(config->id_generate);
 	if (config->dbproxy_user) g_free(config->dbproxy_user);
 	if (config->dbproxy_pwd) g_free(config->dbproxy_pwd);
-	if (config->master_user) g_free(config->master_user);
-	if (config->master_pwd) g_free(config->master_pwd);
-	if (config->slave_user) g_free(config->slave_user);
-	if (config->slave_pwd) g_free(config->slave_pwd);
+	if (config->oligarch_user) g_free(config->oligarch_user);
+	if (config->oligarch_pwd) g_free(config->oligarch_pwd);
+	if (config->politician_user) g_free(config->politician_user);
+	if (config->politician_pwd) g_free(config->politician_pwd);
 
     g_free(config);
 }
@@ -4586,7 +4586,7 @@ static chassis_options_t * network_mysqld_proxy_plugin_get_options(chassis_plugi
 
         chassis_options_add(opts, "proxy-address",            'P', 0, G_OPTION_ARG_STRING, &(config->address), "listening address:port of the proxy-server (default: :4040)", "<host:port>",
                             NULL, show_proxy_address, SHOW_OPTS_PROPERTY);
-        chassis_options_add(opts, "proxy-read-only-backend-addresses", 'r', 0, G_OPTION_ARG_STRING_ARRAY, &(config->read_only_backend_addresses), "address:port of the remote slave-server (default: not set)", "<host:port>",
+        chassis_options_add(opts, "proxy-read-only-backend-addresses", 'r', 0, G_OPTION_ARG_STRING_ARRAY, &(config->read_only_backend_addresses), "address:port of the remote politician-server (default: not set)", "<host:port>",
                             NULL, NULL, 0);
         chassis_options_add(opts, "proxy-backend-addresses",  'b', 0, G_OPTION_ARG_STRING_ARRAY, &(config->backend_addresses), "address:port of the remote backend-servers (default: 127.0.0.1:3306)", "<host:port>",
                             NULL, NULL, 0);
@@ -4655,13 +4655,13 @@ static chassis_options_t * network_mysqld_proxy_plugin_get_options(chassis_plugi
 
 		chassis_options_add(opts, "dbproxy-pwd", 0, 0, G_OPTION_ARG_STRING, &(config->dbproxy_pwd), "dbproxy-pwd", NULL, NULL, NULL, 0);
 
-		chassis_options_add(opts, "master-user", 0, 0, G_OPTION_ARG_STRING, &(config->master_user), "master-user", NULL, NULL, NULL, 0);
+		chassis_options_add(opts, "oligarch-user", 0, 0, G_OPTION_ARG_STRING, &(config->oligarch_user), "oligarch-user", NULL, NULL, NULL, 0);
 	
-		chassis_options_add(opts, "master-pwd", 0, 0, G_OPTION_ARG_STRING, &(config->master_pwd), "master-pwd", NULL, NULL, NULL, 0);
+		chassis_options_add(opts, "oligarch-pwd", 0, 0, G_OPTION_ARG_STRING, &(config->oligarch_pwd), "oligarch-pwd", NULL, NULL, NULL, 0);
 
-		chassis_options_add(opts, "slave-user", 0, 0, G_OPTION_ARG_STRING, &(config->slave_user), "slave-user", NULL, NULL, NULL, 0);
+		chassis_options_add(opts, "politician-user", 0, 0, G_OPTION_ARG_STRING, &(config->politician_user), "politician-user", NULL, NULL, NULL, 0);
 
-		chassis_options_add(opts, "slave-pwd", 0, 0, G_OPTION_ARG_STRING, &(config->slave_pwd), "slave-pwd", NULL, NULL, NULL, 0);
+		chassis_options_add(opts, "politician-pwd", 0, 0, G_OPTION_ARG_STRING, &(config->politician_pwd), "politician-pwd", NULL, NULL, NULL, 0);
 
         config->opts = opts;
     }
@@ -5171,16 +5171,16 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 	又发生变化 
 	dbproxy_user = xxx;
 	dbproxy_pwd = xxx;
-	master_user  = xxx;
-	master_pwd  = xxx;
-	slave_user    = xxx;
-	slave_pwd    = xxx;
+	oligarch_user  = xxx;
+	oligarch_pwd  = xxx;
+	politician_user    = xxx;
+	politician_pwd    = xxx;
 
 	zhangmng 2018/7/4 00:12 为保持统一, 使用原来的方法， 否则只能设置一组账号和密码了
 	*/
     //for (i = 0; config->pwds && config->pwds[i]; i++) 
 	{
-        gchar *user = NULL, *pwd = NULL, *user_master = NULL, *pwd_master = NULL, *user_slave = NULL, *pwd_slave = NULL;
+        gchar *user = NULL, *pwd = NULL, *user_oligarch = NULL, *pwd_oligarch = NULL, *user_politician = NULL, *pwd_politician = NULL;
 //        gchar *cur_pwd = g_strdup(config->pwds[i]);
 //        gchar *tmp_for_free = cur_pwd;
         gboolean is_complete = FALSE;
@@ -5195,10 +5195,10 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 		
 		if ((user = strsep(&cur_pwd, ":")) != NULL) {
 			if ((pwd = strsep(&cur_pwd, ":")) != NULL) {
-				if ((user_master = strsep(&cur_pwd, ":")) != NULL) {
-					if ((pwd_master = strsep(&cur_pwd, ":")) != NULL) {
-						if ((user_slave = strsep(&cur_pwd, ":")) != NULL) {
-							if ((pwd_slave = strsep(&cur_pwd, ":")) != NULL) {
+				if ((user_oligarch = strsep(&cur_pwd, ":")) != NULL) {
+					if ((pwd_oligarch = strsep(&cur_pwd, ":")) != NULL) {
+						if ((user_politician = strsep(&cur_pwd, ":")) != NULL) {
+							if ((pwd_politician = strsep(&cur_pwd, ":")) != NULL) {
 								is_complete = TRUE;
 							}
 						}
@@ -5211,10 +5211,10 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 		
 		if(config->dbproxy_user != NULL && 
 			config->dbproxy_pwd != NULL && 
-			config->master_user != NULL &&
-			config->master_pwd != NULL &&
-			config->slave_user != NULL &&
-			config->slave_pwd != NULL
+			config->oligarch_user != NULL &&
+			config->oligarch_pwd != NULL &&
+			config->politician_user != NULL &&
+			config->politician_pwd != NULL
 		){
 			is_complete = TRUE;
 		}
@@ -5224,20 +5224,20 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 		
 			user = config->dbproxy_user;
 			pwd = config->dbproxy_pwd;
-			user_master = config->master_user;
-			pwd_master = config->master_pwd;
-			user_slave = config->slave_user;
-			pwd_slave = config->slave_pwd;
+			user_oligarch = config->oligarch_user;
+			pwd_oligarch = config->oligarch_pwd;
+			user_politician = config->politician_user;
+			pwd_politician = config->politician_pwd;
 			
 			
 
-			g_log_dbproxy(g_message, "user_proxy is %s, pwd_proxy is %s, user_master is %s, pwd_master is %s, user_slave is %s, pwd_slave is %s", user, pwd, user_master, pwd_master, user_slave, pwd_slave);
+			g_log_dbproxy(g_message, "user_proxy is %s, pwd_proxy is %s, user_oligarch is %s, pwd_oligarch is %s, user_politician is %s, pwd_politician is %s", user, pwd, user_oligarch, pwd_oligarch, user_politician, pwd_politician);
 
             char* raw_pwd = decrypt(pwd);
-			char* raw_pwd_master = decrypt(pwd_master);
-			char* raw_pwd_slave = decrypt(pwd_slave);
+			char* raw_pwd_oligarch = decrypt(pwd_oligarch);
+			char* raw_pwd_politician = decrypt(pwd_politician);
 
-            if (raw_pwd && raw_pwd_master && raw_pwd_slave) {
+            if (raw_pwd && raw_pwd_oligarch && raw_pwd_politician) {
 				/*
 				设置dbproxy本身的账号和密码
 				*/
@@ -5248,14 +5248,14 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 				/*
 				主库 设置密码
 				*/
-				GString* hashed_password_master = g_string_new(NULL);
-				network_mysqld_proto_password_hash(hashed_password_master, raw_pwd_master, strlen(raw_pwd_master));
+				GString* hashed_password_oligarch = g_string_new(NULL);
+				network_mysqld_proto_password_hash(hashed_password_oligarch, raw_pwd_oligarch, strlen(raw_pwd_oligarch));
 				
 				/*
 				从库 设置密码
 				*/
-				GString* hashed_password_slave = g_string_new(NULL);
-				network_mysqld_proto_password_hash(hashed_password_slave, raw_pwd_slave, strlen(raw_pwd_slave));
+				GString* hashed_password_politician = g_string_new(NULL);
+				network_mysqld_proto_password_hash(hashed_password_politician, raw_pwd_politician, strlen(raw_pwd_politician));
 					
 
 				/*
@@ -5264,14 +5264,14 @@ int network_mysqld_proxy_plugin_apply_config(chassis *chas, chassis_plugin_confi
 				value: 加密过的dbproxy本身的密码, 加密过的主mysql密码,加密过的从mysql密码,
 				         主mysql 账号, 从mysql 账号
 				*/
-                user_info_hval *hval = user_info_hval_new(hashed_password, hashed_password_master, user_master, hashed_password_slave, user_slave);
+                user_info_hval *hval = user_info_hval_new(hashed_password, hashed_password_oligarch, user_oligarch, hashed_password_politician, user_politician);
 
-//				 g_log_dbproxy(g_message, "hashed_password_slave is %s ,len is %d", hval->hashed_password_slave->str, hval->hashed_password_slave->len);
+//				 g_log_dbproxy(g_message, "hashed_password_politician is %s ,len is %d", hval->hashed_password_politician->str, hval->hashed_password_politician->len);
 
 				/*
 				保存密码明文, 这里是个数组，感觉作用不到,因为只有一组账号密码在起作用
 				*/
-                raw_user_info *rwi = raw_user_info_new(user, pwd, NULL, NULL, user_master, pwd_master, user_slave, pwd_slave);
+                raw_user_info *rwi = raw_user_info_new(user, pwd, NULL, NULL, user_oligarch, pwd_oligarch, user_politician, pwd_politician);
  
                 g_rw_lock_writer_lock(&bs->user_mgr_lock);
                 if (g_hash_table_lookup(bs->pwd_table, user) == NULL) {

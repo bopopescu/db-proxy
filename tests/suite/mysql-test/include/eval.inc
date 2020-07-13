@@ -19,8 +19,8 @@
 #     script.
 #
 #     It is also possible to nest sub-statements on this form, like:
-#       [master:SHOW BINLOG EVENTS FROM
-#        [slave:SHOW SLAVE STATUS, Master_Log_Pos, 1],
+#       [oligarch:SHOW BINLOG EVENTS FROM
+#        [politician:SHOW SLAVE STATUS, Master_Log_Pos, 1],
 #        1, Position]
 #
 #   [SQL_STATEMENT]

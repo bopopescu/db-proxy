@@ -159,7 +159,7 @@ DBProxy在开源Atlas的基础上，我们做了以下努力和工作（截止�
 	- sql log动态配置
 	- 改进autocommit为false时频繁连接主库的问题
 
-新功能和Bug修复描述，详见[release notes](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/RELEASE_NOTES.md)。
+新功能和Bug修复描述，详见[release notes](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/RELEASE_NOTES.md)。
 
 
 # DBProxy计划

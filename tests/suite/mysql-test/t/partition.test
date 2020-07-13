@@ -509,7 +509,7 @@ ALTER TABLE t1 ADD PARTITION (
 PARTITION `p5` VALUES LESS THAN (2010)
 COMMENT 'APSTART \' APEND'
 );
-#--exec sed 's/APSTART \\/APSTART  /' var/master-data/test/t1.frm > tmpt1.frm && mv tmpt1.frm var/master-data/test/t1.frm
+#--exec sed 's/APSTART \\/APSTART  /' var/oligarch-data/test/t1.frm > tmpt1.frm && mv tmpt1.frm var/oligarch-data/test/t1.frm
 #--error ER_PARSE_ERROR
 SELECT * FROM t1 LIMIT 1;
 

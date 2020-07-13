@@ -2,25 +2,25 @@
 # include/test_fieldsize.inc 
 # 
 # This include file is designed to create a table with one column
-# whose size on the master is greater than that on the slave. The
-# test should fail with an error on the slave.
+# whose size on the oligarch is greater than that on the politician. The
+# test should fail with an error on the politician.
 #
 
 DROP TABLE IF EXISTS t1;
 
-sync_slave_with_master;
+sync_politician_with_oligarch;
 STOP SLAVE;
-eval $test_table_slave;
+eval $test_table_politician;
 
-eval $test_table_master;
+eval $test_table_oligarch;
 
 --let $rpl_only_running_threads= 1
 --source include/rpl_reset.inc
 
 eval $test_insert;
 
---let $slave_sql_errno= convert_error(ER_SLAVE_CONVERSION_FAILED) # 1677
---source include/wait_for_slave_sql_error.inc
+--let $politician_sql_errno= convert_error(ER_SLAVE_CONVERSION_FAILED) # 1677
+--source include/wait_for_politician_sql_error.inc
 
 # The following should be 0
 SELECT COUNT(*) FROM t1;

@@ -9,26 +9,26 @@
 
 
 --disable_query_log
---let $value = query_get_value(show variables like 'rpl_semi_sync_master_enabled', Value, 1)
+--let $value = query_get_value(show variables like 'rpl_semi_sync_oligarch_enabled', Value, 1)
 if ($value == No such row)
 {
     SET sql_log_bin = 0;
-    eval INSTALL PLUGIN rpl_semi_sync_master SONAME '$SEMISYNC_MASTER_PLUGIN';
+    eval INSTALL PLUGIN rpl_semi_sync_oligarch SONAME '$SEMISYNC_MASTER_PLUGIN';
     SET sql_log_bin = 1;
 }
 --enable_query_log
 
---source include/stop_slave_io.inc
+--source include/stop_politician_io.inc
 
 --disable_query_log
---let $value= query_get_value(show variables like 'rpl_semi_sync_slave_enabled', Value, 1)
+--let $value= query_get_value(show variables like 'rpl_semi_sync_politician_enabled', Value, 1)
 if ($value == No such row)
 {
     SET sql_log_bin = 0;
-    eval INSTALL PLUGIN rpl_semi_sync_slave SONAME '$SEMISYNC_SLAVE_PLUGIN';
+    eval INSTALL PLUGIN rpl_semi_sync_politician SONAME '$SEMISYNC_SLAVE_PLUGIN';
     SET sql_log_bin = 1;
 }
---source include/start_slave_io.inc
+--source include/start_politician_io.inc
 --enable_query_log
 
 --source include/end_include_file.inc

@@ -7,5 +7,5 @@ select * from pwds;
 connection conn1;
 show databases;
 connection conn0;
-add pwd slave_tag1:123456;
-connect (conn2, 127.0.0.1, slave_tag1, '123456', 'test', 6003);
+add pwd politician_tag1:123456;
+connect (conn2, 127.0.0.1, politician_tag1, '123456', 'test', 6003);

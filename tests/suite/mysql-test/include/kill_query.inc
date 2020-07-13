@@ -1,6 +1,6 @@
 # ==== Purpose ====
 #
-# Kill a query in the master connection, and then try to reap the
+# Kill a query in the oligarch connection, and then try to reap the
 # result of the killed query.
 #
 # ==== Usage ====
@@ -9,25 +9,25 @@
 #
 # $debug_lock: name of the debug user lock, if set, will release/lock
 #              the specified debug lock accordingly, and before
-#              sourcing this, connection 'master' should get the user
+#              sourcing this, connection 'oligarch' should get the user
 #              lock and run a query in another thread, which will
 #              block before creating statement event.
 #
 # $connection_name: name of the connection that is waiting for the
-#                   lock, this can not be 'master'
+#                   lock, this can not be 'oligarch'
 #
 # $connection_id: id of the connection that is waiting for the lock
 #
 # Example:
 # let $debug_lock=;
-# let $connection_name= master1;
+# let $connection_name= oligarch1;
 # let $connection_id= `SELECT CONNECTION_ID()`;
 # send CREATE TABLE t1;
 # source kill_query.inc;
 #
 # let $debug_lock= "debug_lock.before_query_log_event";
 # eval SELECT GET_LOCK($debug_lock, 10);
-# let $connection_name= master1;
+# let $connection_name= oligarch1;
 # let $connection_id= `SELECT CONNECTION_ID()`;
 # send CREATE TABLE t1;
 # source kill_query.inc;

@@ -109,7 +109,7 @@ libmysql_proxy_la_SOURCES = \
 	network-mysqld-packet.c \
 	network_mysqld_type.c \
 	network_mysqld_proto_binary.c \
-	network-mysqld-masterinfo.c \
+	network-mysqld-oligarchinfo.c \
 	network-conn-pool.c  \
 	network-conn-pool-lua.c  \
 	network-queue.c \
@@ -167,7 +167,7 @@ noinst_HEADERS=\
 	network-mysqld-stats.h \
 	network_mysqld_type.h \
 	network_mysqld_proto_binary.h \
-	network-mysqld-masterinfo.h \
+	network-mysqld-oligarchinfo.h \
 	network-conn-pool.h \
 	network-conn-pool-lua.h \
 	network-queue.h \

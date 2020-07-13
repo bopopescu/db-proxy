@@ -6,7 +6,7 @@
 
 ### Q1：公司内部使用的DBProxy相对于360开源的Atlas做了哪些改进？
 
-详见 [release_notes](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/RELEASE_NOTES.md)
+详见 [release_notes](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/RELEASE_NOTES.md)
 
 ### Q2：CentOS/Ubuntu/Debian默认源中glib2的版本是2.28.8-4.el6，会导致DBProxy make报错，如何获取正确glib2版本？
 
@@ -47,7 +47,7 @@
 
 DBProxy中，将可复用的连接放回连接池，在连接池中，是按照用户名来管理连接的。如果user1 新建立的连接，DBPRoxy会去分给它的backend的连接池中，找到user1的连接，如果有，则分配，没有则新建立连接。
 
-示意图可以参考  [开发手册](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/PROGRAMMING_GUIDE.md)最后的那张图 
+示意图可以参考  [开发手册](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/PROGRAMMING_GUIDE.md)最后的那张图 
 
 ### Q4: DBProxy是如何控制最大连接数的？是否针对不同用户设置最大连接数?
 
@@ -57,11 +57,11 @@ DBProxy中连接池中连接的数量目前还没有限制；目前也没有针�
 
 目前DBProxy 只在CentOS6.5上进行过适配。
 
-需要的环境和依赖库参考[快速入门手册](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/QUICK_START.md)
+需要的环境和依赖库参考[快速入门手册](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/QUICK_START.md)
 
 ### Q6: DBProxy的文档在哪里?
 
-详见[README_ZH](https://github.com/Meituan-Dianping/DBProxy/blob/master/README_ZH.md)
+详见[README_ZH](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/README_ZH.md)
 
 ### Q7: DBProxy是否可以立即在生产环境使用？
 
@@ -114,9 +114,9 @@ DBProxy消耗资源不大，性能影响不大。
  
 - 权重一样，简单的从库轮询（RR）；    
 
-- 权重不同，按权重比例轮询（例如：只有两个可用的slave, slave 1:weight 4  , slave 2: weight 1, 每5次4次发送查询语句到slave1,1次 发送查询语句到slave2）；   
+- 权重不同，按权重比例轮询（例如：只有两个可用的politician, politician 1:weight 4  , politician 2: weight 1, 每5次4次发送查询语句到politician1,1次 发送查询语句到politician2）；   
  
-- 配置了tag，会根据配置的tag发送到指定的从库（tag详细参考 [从库流量配置](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/USER_GUIDE.md#3.3.7.2)）；
+- 配置了tag，会根据配置的tag发送到指定的从库（tag详细参考 [从库流量配置](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/USER_GUIDE.md#3.3.7.2)）；
 
 - 支持threadrunning功能，进行过载保护（DBProxy会周期获取MySQL的实际threadrunning，根据DBProxy 上配置的threadrunning来选择可用的从库）。
 
@@ -180,7 +180,7 @@ DBProxy的日志有两种，第一种是记录DBProxy运行状态的日志，另
 
 ### Q22: DBProxy和MHA能否一起使用，需要配置什么？
 
-DBProxy 可以和MHA一起用，需要配置MHA的switchover和failover脚本里面提升新主库的时候增加上对DBProxy的操作，对DBProxy的主要操作可以参考 [backend管理]( https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/USER_GUIDE.md#3.3.5)。
+DBProxy 可以和MHA一起用，需要配置MHA的switchover和failover脚本里面提升新主库的时候增加上对DBProxy的操作，对DBProxy的主要操作可以参考 [backend管理]( https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/USER_GUIDE.md#3.3.5)。
 
 ### Q23: 能否从管理接口看到SQL是发到哪个实例？
 
@@ -188,7 +188,7 @@ DBProxy 可以和MHA一起用，需要配置MHA的switchover和failover脚本里
 
 ### Q24: sysbench压 DBProxy会报错，和DBProxy里面什么限制有关系么？
 
-DBProxy的限制参考 [SQL语句支持限制](https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/USER_GUIDE.md#3.2)。
+DBProxy的限制参考 [SQL语句支持限制](https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/USER_GUIDE.md#3.2)。
 
 ### Q25: 连接DBProxy发送SQL语句时，报错：I have no server backend，是什么导致的？
 
@@ -245,7 +245,7 @@ DBProxy用到了MySQL C API，需要相关的库和头文件。
 
 ### Q37: DBProxy本身高可用?
 
-DBProxy本身高可用通过lvs、haproxy4层负载均衡来保证。backends(MySQL)的master节点的高可用通过mha保证；slave节点的高可用通过DBProxy保证。
+DBProxy本身高可用通过lvs、haproxy4层负载均衡来保证。backends(MySQL)的oligarch节点的高可用通过mha保证；politician节点的高可用通过DBProxy保证。
 
 ### Q38: 有相关DBProxy结合mha的文档吗?
 
@@ -273,11 +273,11 @@ DNS——MGW(LVS)——DBProxy——MySQL 再配合 mha。
 
 ### Q44: set names utf8 collate utf8_unicode_ci;设置该字符集报错
 
-https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/USER_GUIDE.md#3.2.1.5
+https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/USER_GUIDE.md#3.2.1.5
 
 ### Q45: pdo客户端连接执行报错： 1105 Proxy Warning - Syntax Forbidden Prepare:XXXX ？
 
-https://github.com/Meituan-Dianping/DBProxy/blob/master/doc/USER_GUIDE.md#3.2.2.4
+https://github.com/Meituan-Dianping/DBProxy/blob/oligarch/doc/USER_GUIDE.md#3.2.2.4
 
 ### Q46: backend-max-thread-running＝64,如果数据库的连接大于这个参数会出现什么问题？
 

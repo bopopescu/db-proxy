@@ -18,7 +18,7 @@ mysql> show tables;
 select * from pwds;
 ysql> select * from pwds;
 +----------+----------+-------+----------+-------+-------------+------------+------------+-----------+
-| username | password | hosts | backends | type  | master-user | master-pwd | slave-user | slave-pwd |
+| username | password | hosts | backends | type  | oligarch-user | oligarch-pwd | politician-user | politician-pwd |
 +----------+----------+-------+----------+-------+-------------+------------+------------+-----------+
 | %        |          |       |          | proxy |             |            |            |           |
 | test     | 7O7YJJEK |       |          | proxy | root        | 7O3aIZUN   | root       | 7O7YJJEK  |

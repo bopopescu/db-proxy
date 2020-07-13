@@ -123,10 +123,10 @@ struct chassis_plugin_config {
     gchar* id_generate;
 	gchar* dbproxy_user;
 	gchar* dbproxy_pwd;
-	gchar* master_user;
-	gchar* master_pwd;
-	gchar* slave_user;
-	gchar* slave_pwd;
+	gchar* oligarch_user;
+	gchar* oligarch_pwd;
+	gchar* politician_user;
+	gchar* politician_pwd;
 };
 
 extern chassis_plugin_config *config;

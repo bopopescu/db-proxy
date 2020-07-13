@@ -382,10 +382,10 @@ CREATE TABLE t11(
   genreid int  NOT NULL default '0',
   name char(80) NOT NULL default '',
   priority int NOT NULL default '0',
-  masterclip char(1) default NULL,
+  oligarchclip char(1) default NULL,
   PRIMARY KEY  (genreid)
 ) ;
-CREATE INDEX t11_masterclip ON t11( masterclip);
+CREATE INDEX t11_oligarchclip ON t11( oligarchclip);
 INSERT INTO t11 VALUES
   (19, "Pop & Dance", 95, 'Y'), (3, "Rock & Alternative", 100, 'Y');
 

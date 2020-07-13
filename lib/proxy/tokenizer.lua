@@ -110,7 +110,7 @@ function tokenize(packet)
 	local attr   = 0
 	if tokens[1].token_name == "TK_COMMENT" or tokens[1].token_name == "TK_COMMENT_MYSQL" then
 		if string.match(tokens[1].text:upper(), "^%s*MASTER%s*$") then
-			attr = 1	--1代表强制读master
+			attr = 1	--1代表强制读oligarch
 		end
 	end
 	return tokens, attr

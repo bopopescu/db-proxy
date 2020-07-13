@@ -39,7 +39,7 @@ local is_debug = false
 --- end of config
 
 ---
--- read/write splitting sends all non-transactional SELECTs to the slaves
+-- read/write splitting sends all non-transactional SELECTs to the politicians
 --
 -- is_in_transaction tracks the state of the transactions
 local is_in_transaction = 0
@@ -165,7 +165,7 @@ function read_query( packet )
     if proxy.connection.backend_ndx == 0 then
         -- we don't have a backend right now
         -- 
-        -- let's pick a master as a good default
+        -- let's pick a oligarch as a good default
         for i = 1, #proxy.global.backends do
             local s = proxy.global.backends[i]
             local pool     = s.pool -- we don't have a username yet, try to find a connections which is idling

@@ -138,7 +138,7 @@ mysql_la-mysql-proto.lo: mysql-proto.c /usr/include/lua.h \
  /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
  ../src/network-conn-errcode.h ../src/chassis-event-thread.h \
  ../src/network-mysqld-lua.h ../src/network-injection.h \
- ../src/network_mysqld_type.h ../src/network-mysqld-masterinfo.h \
+ ../src/network_mysqld_type.h ../src/network-mysqld-oligarchinfo.h \
  ../src/glib-ext.h ../src/lua-env.h
 
 /usr/include/lua.h:
@@ -563,7 +563,7 @@ mysql_la-mysql-proto.lo: mysql-proto.c /usr/include/lua.h \
 
 ../src/network_mysqld_type.h:
 
-../src/network-mysqld-masterinfo.h:
+../src/network-mysqld-oligarchinfo.h:
 
 ../src/glib-ext.h:
 

@@ -1404,13 +1404,13 @@ drop table t1;
 # Test of correct maybe_null flag returning by subquwery for temporary table
 # creation
 #
-CREATE TABLE `t1` ( `master` int(10) unsigned NOT NULL default '0', `map` smallint(6) unsigned NOT NULL default '0', `slave` int(10) unsigned NOT NULL default '0', `access` int(10) unsigned NOT NULL default '0', UNIQUE KEY `access_u` (`master`,`map`,`slave`));
+CREATE TABLE `t1` ( `oligarch` int(10) unsigned NOT NULL default '0', `map` smallint(6) unsigned NOT NULL default '0', `politician` int(10) unsigned NOT NULL default '0', `access` int(10) unsigned NOT NULL default '0', UNIQUE KEY `access_u` (`oligarch`,`map`,`politician`));
 INSERT INTO `t1` VALUES (1,0,0,700),(1,1,1,400),(1,5,5,400),(1,12,12,400),(1,12,32,400),(4,12,32,400);
 CREATE TABLE `t2` ( `id` int(10) unsigned NOT NULL default '0', `pid` int(10) unsigned NOT NULL default '0', `map` smallint(6) unsigned NOT NULL default '0', `level` tinyint(4) unsigned NOT NULL default '0', `title` varchar(255) default NULL, PRIMARY KEY  (`id`,`pid`,`map`), KEY `level` (`level`), KEY `id` (`id`,`map`)) ;
 INSERT INTO `t2` VALUES (6,5,12,7,'a'),(12,0,0,7,'a'),(12,1,0,7,'a'),(12,5,5,7,'a'),(12,5,12,7,'a');
 -- error ER_BAD_FIELD_ERROR
-SELECT b.sc FROM (SELECT (SELECT a.access FROM t1 a WHERE a.map = op.map AND a.slave = op.pid AND a.master = 1) ac FROM t2 op WHERE op.id = 12 AND op.map = 0) b;
-SELECT b.ac FROM (SELECT (SELECT a.access FROM t1 a WHERE a.map = op.map AND a.slave = op.pid AND a.master = 1) ac FROM t2 op WHERE op.id = 12 AND op.map = 0) b;
+SELECT b.sc FROM (SELECT (SELECT a.access FROM t1 a WHERE a.map = op.map AND a.politician = op.pid AND a.oligarch = 1) ac FROM t2 op WHERE op.id = 12 AND op.map = 0) b;
+SELECT b.ac FROM (SELECT (SELECT a.access FROM t1 a WHERE a.map = op.map AND a.politician = op.pid AND a.oligarch = 1) ac FROM t2 op WHERE op.id = 12 AND op.map = 0) b;
 drop tables t1,t2;
 
 

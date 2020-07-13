@@ -58,7 +58,7 @@
  * - running the BINLOG_DUMP
  *
  * - split binlog stream into multiple streams based on
- *   lua-script and push the streams into the slaves
+ *   lua-script and push the streams into the politicians
  *   - thread-ids
  *   - server-id
  *   - database name
@@ -85,7 +85,7 @@ typedef struct {
 } plugin_con_state;
 
 struct chassis_plugin_config {
-    gchar *master_address;                   /**< listening address of the proxy */
+    gchar *oligarch_address;                   /**< listening address of the proxy */
 
     gchar *mysqld_username;
     gchar *mysqld_password;
@@ -117,7 +117,7 @@ static void plugin_con_state_free(plugin_con_state *st) {
 /**
  * decode the result-set of SHOW MASTER STATUS
  */
-static int network_mysqld_resultset_master_status(chassis *UNUSED_PARAM(chas), network_mysqld_con *con) {
+static int network_mysqld_resultset_oligarch_status(chassis *UNUSED_PARAM(chas), network_mysqld_con *con) {
     GList *chunk;
     guint i;
     network_socket *sock = con->client;
@@ -324,7 +324,7 @@ NETWORK_MYSQLD_PLUGIN_PROTO(repclient_read_query_result) {
      * - COM_BINLOG_DUMP
      *   - 4byte pos
      *   - 2byte flags (BINLOG_DUMP_NON_BLOCK)
-     *   - 4byte slave-server-id
+     *   - 4byte politician-server-id
      *   - nul-term binlog name
      *
      * we don't need:
@@ -335,7 +335,7 @@ NETWORK_MYSQLD_PLUGIN_PROTO(repclient_read_query_result) {
      *   - nul-term password
      *   - 2byte port
      *   - 4byte recovery rank
-     *   - 4byte master-id
+     *   - 4byte oligarch-id
      */
     network_packet packet;
     GList *chunk;
@@ -418,7 +418,7 @@ NETWORK_MYSQLD_PLUGIN_PROTO(repclient_read_query_result) {
         case REPCLIENT_BINLOG_GET_POS:
             /* parse the result-set and get the 1st and 2nd column */
 
-            network_mysqld_resultset_master_status(chas, con);
+            network_mysqld_resultset_oligarch_status(chas, con);
 
             /* remove all packets */
             while ((s_packet = g_queue_pop_head(send_sock->send_queue->chunks))) g_string_free(s_packet, TRUE);
@@ -463,7 +463,7 @@ NETWORK_MYSQLD_PLUGIN_PROTO(repclient_read_query_result) {
 
 NETWORK_MYSQLD_PLUGIN_PROTO(repclient_connect_server) {
     chassis_plugin_config *config = con->config;
-    gchar *address = config->master_address;
+    gchar *address = config->oligarch_address;
 
     con->server = network_socket_new(SOCKET_SERVER);
     network_socket_set_chassis(con->server, con->srv);
@@ -533,9 +533,9 @@ void network_mysqld_replicant_plugin_free(chassis_plugin_config *config) {
 #endif
     }
 
-    if (config->master_address) {
+    if (config->oligarch_address) {
         /* free the global scope */
-        g_free(config->master_address);
+        g_free(config->oligarch_address);
     }
 
     if (config->mysqld_username) g_free(config->mysqld_username);
@@ -554,7 +554,7 @@ static chassis_options_t * network_mysqld_replicant_plugin_get_options(chassis_p
     if (config->opts == NULL) {
         chassis_options_t *opts = chassis_options_new();
 
-        chassis_options_add(opts, "replicant-master-address",            0, 0, G_OPTION_ARG_STRING, &(config->master_address), "... (default: :4040)", "<host:port>",
+        chassis_options_add(opts, "replicant-oligarch-address",            0, 0, G_OPTION_ARG_STRING, &(config->oligarch_address), "... (default: :4040)", "<host:port>",
                             NULL, NULL, 0);
         chassis_options_add(opts, "replicant-username",                  0, 0, G_OPTION_ARG_STRING, &(config->mysqld_username), "username", "",
                             NULL, NULL, 0);
@@ -789,7 +789,7 @@ int replicate_binlog_dump_file(const char *filename) {
  * init the plugin with the parsed config
  */
 int network_mysqld_replicant_plugin_apply_config(chassis G_GNUC_UNUSED *chas, chassis_plugin_config *config) {
-    if (!config->master_address) config->master_address = g_strdup(":4040");
+    if (!config->oligarch_address) config->oligarch_address = g_strdup(":4040");
     if (!config->mysqld_username) config->mysqld_username = g_strdup("repl");
     if (!config->mysqld_password) config->mysqld_password = g_strdup("");
 

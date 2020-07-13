@@ -10,5 +10,5 @@ benchmarksql
 mysql
 performance_schema
 test
-add pwd slave_tag1:123456;
+add pwd politician_tag1:123456;
 status

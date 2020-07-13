@@ -1,5 +1,5 @@
-libmysql_proxy_la-network-mysqld-masterinfo.lo: \
- network-mysqld-masterinfo.c /usr/include/stdlib.h \
+libmysql_proxy_la-network-mysqld-oligarchinfo.lo: \
+ network-mysqld-oligarchinfo.c /usr/include/stdlib.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
@@ -98,7 +98,7 @@ libmysql_proxy_la-network-mysqld-masterinfo.lo: \
  /usr/local/include/glib-2.0/glib/deprecated/grel.h \
  /usr/local/include/glib-2.0/glib/deprecated/gthread.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
- /usr/include/bits/setjmp.h chassis-exports.h network-mysqld-masterinfo.h \
+ /usr/include/bits/setjmp.h chassis-exports.h network-mysqld-oligarchinfo.h \
  network-exports.h network-mysqld-proto.h \
  /usr/local/mysql/include/mysql.h \
  /usr/local/mysql/include/mysql_version.h \
@@ -356,7 +356,7 @@ glib-ext.h:
 
 chassis-exports.h:
 
-network-mysqld-masterinfo.h:
+network-mysqld-oligarchinfo.h:
 
 network-exports.h:
 

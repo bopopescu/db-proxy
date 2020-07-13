@@ -1123,8 +1123,8 @@ user-backends=root@tag_mt,dbproxy@tag_mt|tag_dp;
 在admin端口可以对用户所配置的tag进行动态的增加、删除（大小写敏感），命令如下：   
 
 ```
-add user backends $username@$slave_tag[|$slave_tag];            
-remove user backends $username@$slave_tag[|$slave_tag];               
+add user backends $username@$politician_tag[|$politician_tag];            
+remove user backends $username@$politician_tag[|$politician_tag];               
 remove user backends $username;             
 ```
 
@@ -1347,8 +1347,8 @@ proxy-read-only-backend-addresses=1.1.1.1:3306$tag_mt@10,2.2.2.2:3306;
 
 ```
 select * from backends;                     #对backends相关的信息进行查看        
-add master $backend;                        #增加一个主库backend,增加的主库backend的格式同配置文件            
-add slave $backend;                         #增加一个从库backend,增加的从库的backend的格式同配置文件                
+add oligarch $backend;                        #增加一个主库backend,增加的主库backend的格式同配置文件            
+add politician $backend;                         #增加一个从库backend,增加的从库的backend的格式同配置文件                
 remove backend $backend_ndx [timeout $int]  #删除一个backend_ndx的库，与此同时可以指定超时时间           
 set remove-backend-timeout = $int           #设置全局的删除backend的超时时间      
 set online $backend_ndx;                    #设置一个backend_ndx的库的状态为online状态           
@@ -1411,7 +1411,7 @@ set offline $backend_ndx;                   #设置一个backend_ndx的库的状
 </tr>
 </table>
 
-add master 与 add slave 命令可以动态的增加主库和从库，例如增加一个从库(1.1.1.1:3306)，可以直接在admin 端口执行：  
+add oligarch 与 add politician 命令可以动态的增加主库和从库，例如增加一个从库(1.1.1.1:3306)，可以直接在admin 端口执行：  
 
 ![](./img/33513.jpg)  
 
@@ -1808,14 +1808,14 @@ show lastest_queries
 
 该功能可以通过hint功能指定某个用户的某次请求发送到指定的从库中去。  
 
-该功能涉及到了从库(ro-backend)、标签(slave-tag)和用户(username)三者之间的关系，该三者之间的关系可以通过文氏图进行表示。   
+该功能涉及到了从库(ro-backend)、标签(politician-tag)和用户(username)三者之间的关系，该三者之间的关系可以通过文氏图进行表示。   
 
-![](./img/slavetag-relation.bmp)  
+![](./img/politiciantag-relation.bmp)  
 
 通过三者之间的文氏图可以看出，用户名和标签是一对多关系，而标签和从库也是一对多关系，即一个用户名下可以配置多个标签，用户可以通过hint功能指定请求发送到哪个具体标签上，而一个标签可以对应多个从库，即发往该标签的请求，轮询方式发往该标签对应的从库中去。   
 
 **使用方法**   
-在配置文件中，配置从库的同时可以指定该从库的标签和从库的权重，配置文件中的配置格式为：slave_ip:slave_port$slave_tagname@slave_weight。   
+在配置文件中，配置从库的同时可以指定该从库的标签和从库的权重，配置文件中的配置格式为：politician_ip:politician_port$politician_tagname@politician_weight。   
 
 例如，在配置文件中配置ip为1.1.1.1 port为：3306的从库的标签为 tag_wm，以及权重为 1 的配置文件中的书写方法为：   
 
@@ -1838,9 +1838,9 @@ select * from backends;
 标签管理中，可以在Admin端口动态的对某个从库增加或是删除标签，其命令格式如下。  
 
 ```
-add slave tag $tagname $backend_index[,$backend_index];   #为索引为$backend_index 的从库增加名为$tagname的标签，标签可覆盖                    
-remove slave tag $tagname;                                #删除所有从库上名为$tagname的标签                       
-remove slave tag $tagname backend_index[,$backend_index]; #删除索引为$backend_index 的从库上的名为$tagname的标签            
+add politician tag $tagname $backend_index[,$backend_index];   #为索引为$backend_index 的从库增加名为$tagname的标签，标签可覆盖                    
+remove politician tag $tagname;                                #删除所有从库上名为$tagname的标签                       
+remove politician tag $tagname backend_index[,$backend_index]; #删除索引为$backend_index 的从库上的名为$tagname的标签            
 ```
 
 例如，将上图 backend_ndx = 2 的从库的tagname 修改为：ght，则可以通过下述命令（因为该命令指定的标签可以覆盖已有标签）：         
@@ -1870,7 +1870,7 @@ remove slave tag $tagname backend_index[,$backend_index]; #删除索引为$backe
 权重管理中，可以在Admin端口动态修改backend的权重，其命令格式如下：   
 
 ```
-alter slave weight $backend_index $weight  #修改索引为$backend_index的从库的权重为$weight             
+alter politician weight $backend_index $weight  #修改索引为$backend_index的从库的权重为$weight             
 ```
 
 例如，修改backend_index = 3从库上的权重，将其权重修改为1024，则可以使用下述命令：  
@@ -1894,9 +1894,9 @@ select * from pwds;
 可以通过以下命令，修改用户关联的backends：   
 
 ```
-add user backends $username@$slave_tag[|$slave_tag]; #为用户username增加关联的backends           
+add user backends $username@$politician_tag[|$politician_tag]; #为用户username增加关联的backends           
 remove user backends $username;                    #删除用户username关联的所有backends           
-remove user backends $username@$slave_tag[|$slave_tag]; #\删除用户username关联的backends          
+remove user backends $username@$politician_tag[|$politician_tag]; #\删除用户username关联的backends          
 ```
 
 例如，为当前root用户增加两个backends，则可以使用下述命令：   
@@ -1916,7 +1916,7 @@ remove user backends $username@$slave_tag[|$slave_tag]; #\删除用户username�
 现在，使用root用户连接DBProxy，可以使用hint功能指定语句发往的从库了，命令格式如下：  
 
 ```
-/*slave@$slave_tag*/ sql-statement;   
+/*politician@$politician_tag*/ sql-statement;   
 ```
 
 例如，希望当前语句发往tag=tag_dp的从库，则命令如下：   
@@ -1941,13 +1941,13 @@ remove user backends $username@$slave_tag[|$slave_tag]; #\删除用户username�
 可以指派某条语句发往主库，语法如下：   
 
 ```
-/*master*/sql-statement;      
+/*oligarch*/sql-statement;      
 ```
 
 例如，一条sql：select * from test.sbtest1; 一般查询的sql语句会发往某一从库，如果此时需要其发往主库，则需要使用下述命令：   
 
 ```
-/*master*/select * from test.sbtest1;    
+/*oligarch*/select * from test.sbtest1;    
 ```
 
 ### 3.3.8 统计信息管理   

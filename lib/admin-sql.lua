@@ -92,7 +92,7 @@ function read_query(packet)
             "\000" .. -- report-password ?
             "\001\000" .. -- our port
             "\000\000\000\000" .. -- recovery rank
-            "\001\000\000\000" .. -- master id ... what ever that is
+            "\001\000\000\000" .. -- oligarch id ... what ever that is
             ""
             , { resultset_is_needed = true }) 
         return proxy.PROXY_SEND_QUERY

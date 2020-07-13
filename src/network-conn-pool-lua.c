@@ -192,7 +192,7 @@ ret:
     return 0;
 }
 
-network_socket *self_connect(network_mysqld_con *con, network_backend_t *backend, GHashTable *pwd_table, gint is_master) {
+network_socket *self_connect(network_mysqld_con *con, network_backend_t *backend, GHashTable *pwd_table, gint is_oligarch) {
     struct timeval tv;
 
     //1. connect DB
@@ -299,11 +299,11 @@ network_socket *self_connect(network_mysqld_con *con, network_backend_t *backend
 		这里要传真正的mysql 的 root
 	*/
 
-	g_log_dbproxy(g_message, "self_connect  dbproxy connect real mysql  info user is  %s, is_master is %d", NETWORK_SOCKET_USR_NAME(con->client),is_master ); 
+	g_log_dbproxy(g_message, "self_connect  dbproxy connect real mysql  info user is  %s, is_oligarch is %d", NETWORK_SOCKET_USR_NAME(con->client),is_oligarch ); 
 
 	gchar* user = NULL;
     GString *hashed_password = get_hash_passwd(pwd_table, NETWORK_SOCKET_USR_NAME(con->client),
-                                                         &(con->srv->backends->user_mgr_lock), &user, is_master);
+                                                         &(con->srv->backends->user_mgr_lock), &user, is_oligarch);
 
 	int user_len = strlen(user);
 	g_assert(user != NULL);
@@ -469,7 +469,7 @@ network_socket *self_connect(network_mysqld_con *con, network_backend_t *backend
  * @return NULL if swapping failed
  *         the new backend on success
  */
-network_socket *network_connection_pool_lua_swap(network_mysqld_con *con, network_backend_t *backend, int backend_ndx, GHashTable *pwd_table, gint is_master) {
+network_socket *network_connection_pool_lua_swap(network_mysqld_con *con, network_backend_t *backend, int backend_ndx, GHashTable *pwd_table, gint is_oligarch) {
     network_socket *send_sock;
     network_mysqld_con_lua_t *st = con->plugin_con_state;
 
@@ -497,7 +497,7 @@ network_socket *network_connection_pool_lua_swap(network_mysqld_con *con, networ
             g_free(msg);
         }
         
-        if (NULL == (send_sock = self_connect(con, backend, pwd_table, is_master))) {
+        if (NULL == (send_sock = self_connect(con, backend, pwd_table, is_oligarch))) {
             st->backend_ndx = -1;
             if (TRACE_SQL(con->srv->log->log_trace_modules)) {
                 gchar *msg = g_strdup_printf("create new connection to backend(id:%d host:%s) failed",

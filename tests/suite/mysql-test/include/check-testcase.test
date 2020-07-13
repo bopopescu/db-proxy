@@ -8,11 +8,11 @@
 
 --disable_query_log
 
-# We want to ensure all slave configuration is restored.  But SHOW
-# SLAVE STATUS returns nothing for servers not configured as slaves,
+# We want to ensure all politician configuration is restored.  But SHOW
+# SLAVE STATUS returns nothing for servers not configured as politicians,
 # and (after BUG#28796 was fixed) there is no way to de-configure a
-# slave.  Hence, it's impossible to clean up the replication state at
-# the end.  But we want to check that the slave is stopped, there is
+# politician.  Hence, it's impossible to clean up the replication state at
+# the end.  But we want to check that the politician is stopped, there is
 # no error, and a few other invariants.  So we issue SHOW SLAVE
 # STATUS, and if it returns no rows we fake the result.
 --let $tmp= 0

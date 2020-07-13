@@ -390,8 +390,8 @@ src/network-mysqld-binlog.h</td>
 <td>高</td>
 </tr>
 <tr>
-<td>src/network-mysqld-masterinfo.c <p>
-src/network-mysqld-masterinfo.h</td>
+<td>src/network-mysqld-oligarchinfo.c <p>
+src/network-mysqld-oligarchinfo.h</td>
 <td>未使用</td>
 <td>低</td>
 </tr>

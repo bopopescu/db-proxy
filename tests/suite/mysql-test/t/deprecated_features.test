@@ -10,9 +10,9 @@ restore table t1 from 'data.txt';
 --error ER_PARSE_ERROR
 show plugin;
 --error ER_PARSE_ERROR
-load table t1 from master;
+load table t1 from oligarch;
 --error ER_PARSE_ERROR
-load data from master;
+load data from oligarch;
 --error ER_PARSE_ERROR
 SHOW INNODB STATUS;
 --error ER_PARSE_ERROR

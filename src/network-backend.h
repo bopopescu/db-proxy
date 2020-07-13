@@ -91,7 +91,7 @@ typedef struct {
     GString *uuid;           /**< the UUID of the backend */
     guint weight;
 
-    GString *slave_tag;
+    GString *politician_tag;
 
     gint        thread_running;
     GRWLock     backend_lock;
@@ -159,7 +159,7 @@ NETWORK_API int network_backends_add(network_backends_t *backends, gchar *addres
 NETWORK_API int network_backends_remove(network_backends_t *bs, network_backend_t *backend);
 NETWORK_API int network_backends_addclient(network_backends_t *backends, gchar *address);
 NETWORK_API int network_backends_removeclient(network_backends_t *backends, gchar *address);
-NETWORK_API int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_master, const gchar *pwdmaster, const gchar *user_slave, const gchar *pwd_slave, gboolean is_encrypt);
+NETWORK_API int network_backends_addpwd(network_backends_t *bs, const gchar *user, const gchar *pwd, const gchar *user_oligarch, const gchar *pwdoligarch, const gchar *user_politician, const gchar *pwd_politician, gboolean is_encrypt);
 NETWORK_API int network_backends_removepwd(network_backends_t *backends, const gchar *user);
 NETWORK_API int network_backends_check(network_backends_t *backends);
 NETWORK_API network_backend_t * network_backends_get(network_backends_t *backends, guint ndx);
@@ -178,17 +178,17 @@ typedef struct {
     gchar *encrypt_pwd;
     gchar *user_hosts;
     gchar *backends;
-	gchar* user_master;
-	gchar* encrypt_pwd_master;
-	gchar* user_slave;
-	gchar* encrypt_pwd_slave;
+	gchar* user_oligarch;
+	gchar* encrypt_pwd_oligarch;
+	gchar* user_politician;
+	gchar* encrypt_pwd_politician;
 } raw_user_info;
 
 /*
 zhangming 2018/1/15 0:17
 也保存主，从账号
 */
-NETWORK_API raw_user_info *raw_user_info_new(const gchar *username, const gchar *encrypt_pwd, const gchar *user_hosts, gchar *backends, const gchar* user_master, const gchar* encrypt_pwd_master, const gchar* user_slave, const gchar* encrypt_pwd_slave);
+NETWORK_API raw_user_info *raw_user_info_new(const gchar *username, const gchar *encrypt_pwd, const gchar *user_hosts, gchar *backends, const gchar* user_oligarch, const gchar* encrypt_pwd_oligarch, const gchar* user_politician, const gchar* encrypt_pwd_politician);
 
 /*
 zhangming 2018/1/14 1:32
@@ -200,24 +200,24 @@ typedef struct user_info_hval {
     GPtrArray   *user_hosts;
     GPtrArray *backends_tag;
     gint        user_tag_max_weight;
-	gchar*    user_master;
-	GString     *hashed_password_master;
-	gchar*    user_slave;
-	GString     *hashed_password_slave;
+	gchar*    user_oligarch;
+	GString     *hashed_password_oligarch;
+	gchar*    user_politician;
+	GString     *hashed_password_politician;
 	//gchar*    host_real_db;  //以后再说
 } user_info_hval;
 
 
-NETWORK_API user_info_hval *user_info_hval_new(GString *hashed_passwd, GString *hashed_password_master, gchar* user_master, GString *hashed_password_slave, gchar* user_slave);
-NETWORK_API GString *get_hash_passwd(GHashTable *pwd_table, gchar *username, GRWLock *user_mgr_lock, gchar** user, gint is_master);
+NETWORK_API user_info_hval *user_info_hval_new(GString *hashed_passwd, GString *hashed_password_oligarch, gchar* user_oligarch, GString *hashed_password_politician, gchar* user_politician);
+NETWORK_API GString *get_hash_passwd(GHashTable *pwd_table, gchar *username, GRWLock *user_mgr_lock, gchar** user, gint is_oligarch);
 NETWORK_API gboolean check_user_host(GHashTable *pwd_table, gchar *username, gchar *client_ip, GRWLock *user_mgr_lock);
 NETWORK_API int user_hosts_handle(network_backends_t *bs, const gchar *user, const gchar *raw_user_hosts, gint type);
 NETWORK_API int user_backends_handle(network_backends_t *bs, const gchar *user, const gchar *user_backends, gint type);
 
 NETWORK_API network_backends_tag * get_user_backends(network_backends_t *bs, GHashTable *pwd_table, gchar *username, gchar *backend_tag, GRWLock *user_mgr_lock);
-NETWORK_API gint alter_slave_weight(network_backends_t *bs, gint idx, gint weight);
-NETWORK_API gint add_slave_tag(network_backends_t *bs, gchar *tagname,gchar *idxs );
-NETWORK_API gint remove_slave_tag(network_backends_t *bs, gchar *tagname,gchar *idxs );
+NETWORK_API gint alter_politician_weight(network_backends_t *bs, gint idx, gint weight);
+NETWORK_API gint add_politician_tag(network_backends_t *bs, gchar *tagname,gchar *idxs );
+NETWORK_API gint remove_politician_tag(network_backends_t *bs, gchar *tagname,gchar *idxs );
 
 NETWORK_API admin_user_info *admin_user_info_new();
 NETWORK_API void admin_user_info_free(admin_user_info *au);

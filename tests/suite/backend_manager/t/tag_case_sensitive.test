@@ -1,22 +1,22 @@
 #tag-case-sensitive
 connect (conn0, 127.0.0.1, dbproxy_test, '123456', '*NO-ONE*', 6018);
 
-#case1: slave tag
+#case1: politician tag
 connection conn0;
-add slave tag tag_MT 2;
+add politician tag tag_MT 2;
 select * from backends;
 
-remove slave tag tag_mt 2;
+remove politician tag tag_mt 2;
 select * from backends;
-remove slave tag tag_MT 2;
-select * from backends;
-
-add slave tag tag_DP 2;
+remove politician tag tag_MT 2;
 select * from backends;
 
-remove slave tag tag_dp;
+add politician tag tag_DP 2;
 select * from backends;
-remove slave tag tag_DP;
+
+remove politician tag tag_dp;
+select * from backends;
+remove politician tag tag_DP;
 select * from backends;
 
 #case2: user backends

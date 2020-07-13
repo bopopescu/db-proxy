@@ -1659,7 +1659,7 @@ if ($test_foreign_keys)
 
 set foreign_key_checks=0;
 eval create table t2 (a int primary key, b int, foreign key (b) references t1(a)) engine = $engine_type;
---replace_result $MYSQLTEST_VARDIR . master-data/ ''
+--replace_result $MYSQLTEST_VARDIR . oligarch-data/ ''
 -- error 1005
 eval create table t1(a char(10) primary key, b varchar(20)) engine = $engine_type;
 set foreign_key_checks=1;
@@ -1670,7 +1670,7 @@ drop table t2;
 
 set foreign_key_checks=0;
 eval create table t1(a varchar(10) primary key) engine = $engine_type DEFAULT CHARSET=latin1;
---replace_result $MYSQLTEST_VARDIR . master-data/ ''
+--replace_result $MYSQLTEST_VARDIR . oligarch-data/ ''
 -- error 1005
 eval create table t2 (a varchar(10), foreign key (a) references t1(a)) engine = $engine_type DEFAULT CHARSET=utf8;
 set foreign_key_checks=1;
@@ -1700,7 +1700,7 @@ drop table t2,t1;
 set foreign_key_checks=0;
 eval create table t2 (a varchar(10), foreign key (a) references t1(a)) engine = $engine_type DEFAULT CHARSET=latin1;
 eval create table t3(a varchar(10) primary key) engine = $engine_type DEFAULT CHARSET=utf8;
---replace_result $MYSQLTEST_VARDIR . master-data/ ''
+--replace_result $MYSQLTEST_VARDIR . oligarch-data/ ''
 -- error 1025
 rename table t3 to t1;
 set foreign_key_checks=1;

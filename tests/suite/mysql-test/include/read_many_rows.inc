@@ -8,7 +8,7 @@
 #     $other_engine_type -- storage engine <> $engine_type, if possible
 #                           1. $other_engine_type must allow to store many rows
 #                              without using non standard server options
-#                              (does not need a t/read_many_rows_*-master.opt file)
+#                              (does not need a t/read_many_rows_*-oligarch.opt file)
 #                           2. $other_engine_type must point to an all time
 #                              available storage engine
 #                              2006-08 MySQL 5.1 MyISAM and MEMORY only
